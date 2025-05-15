@@ -880,6 +880,11 @@ namespace Tactile
                 return 0;
             Data_Weapon weapon = Global.data_weapons[weapon_id];
             int wgt = actor.weapon_wgt(weapon);
+            if (actor.secondary_equip != null)
+                if (Global.data_weapons.ContainsKey(actor.secondary_equip_id))
+                {
+                    wgt += actor.weapon_wgt(actor.secondary_equip);
+                }
             return (int)(stat(Stat_Labels.Con) < wgt ? wgt - stat(Stat_Labels.Con) : 0);
         }
 

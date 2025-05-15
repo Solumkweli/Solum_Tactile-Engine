@@ -204,7 +204,7 @@ namespace Tactile
                         {
                             Item = unit.actor.items[j],
                             Drops = unit.drops_item && j == unit.actor.num_items - 1,
-                            Equipped = unit.actor.equipped - 1 == j
+                            Equipped = (unit.actor.equipped - 1 == j) || (unit.actor.secondary_equipped - 1 == j)
                         };
                     }));
                 nodes.Last().loc = loc;

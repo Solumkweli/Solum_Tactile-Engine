@@ -1876,6 +1876,11 @@ namespace Tactile
                     foreach (int skill_id in this.weapon.Skills)
                         if (!skills.Contains(skill_id))
                             skills.Add(skill_id);
+                // Secondary equip skills
+                if (this.secondary_equip != null)
+                    foreach (int skill_id in this.secondary_equip.Skills)
+                        if (!skills.Contains(skill_id))
+                            skills.Add(skill_id);
                 // Item skills
                 foreach (Item_Data item_data in Items)
                     if (item_data.Id > 0 && item_data.is_item)
@@ -1905,6 +1910,10 @@ namespace Tactile
                 // Weapon skills
                 if (this.weapon != null)
                     foreach (int skill_id in this.weapon.Skills)
+                        skills.Add(skill_id);
+                // Secondary equip skills
+                if (this.secondary_equip != null)
+                    foreach (int skill_id in this.secondary_equip.Skills)
                         skills.Add(skill_id);
                 // Item skills
                 /* //Debug

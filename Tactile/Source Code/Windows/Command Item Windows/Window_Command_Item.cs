@@ -120,7 +120,6 @@ namespace Tactile.Windows.Command.Items
             refresh_layout();
             refresh();
         }
-        
         protected void refresh_item_stats()
         {
             refresh_item_stats(Stat_Values);
@@ -374,7 +373,7 @@ namespace Tactile.Windows.Command.Items
                 for (int i = 0; i < base.Items.Count; i++) //Debug
                 {
                     (base.Items[i] as ItemUINode).equip(
-                        Index_Redirect[i] == Equipped - 1); //Debug
+                        (Index_Redirect[i] == Equipped - 1) || (Index_Redirect[i] == Secondary_Equipped -1 )); //Debug
                 }
             }
         }
