@@ -1134,6 +1134,15 @@ namespace Tactile
                 actor.weapon_id = this.items[index - 1].Id;
             }
         }
+        public void equip_secondary(int index)
+        {
+            if (actor.in_equip_range(index))
+                actor.equip_secondary(index);
+            else
+            {
+                actor.secondary_equip_id = this.items[index - 1].Id;
+            }
+        }
 
         public bool is_weapon_broke()
         {

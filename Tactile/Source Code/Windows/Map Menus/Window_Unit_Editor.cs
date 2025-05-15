@@ -353,7 +353,7 @@ namespace Tactile.Windows.Map
                     }
                     else
                     {
-                        if (test_battler.Items[i].is_weapon && !actor.is_equippable(test_battler.Items[i].to_weapon))
+                        if (test_battler.Items[i].is_weapon && !actor.is_equippable(test_battler.Items[i].to_weapon) && !actor.is_secondary_equippable(test_battler.Items[i].to_weapon))
                             Data[item_index].SetColor(Global.Content, "Grey");
 
                         try
@@ -1319,7 +1319,7 @@ namespace Tactile.Windows.Map
             }
 
             for (int i = 0; i < Weapons.Count; i++)
-                if (Global.data_weapons.ContainsKey(Weapons[i]) && temp_actor.is_equippable(Global.data_weapons[Weapons[i]]))
+                if (Global.data_weapons.ContainsKey(Weapons[i]) && (temp_actor.is_equippable(Global.data_weapons[Weapons[i]]) || temp_actor.is_secondary_equippable(Global.data_weapons[Weapons[i]])))
                 {
                     test_battler.Weapon_Id = Weapons[i];
                     break;

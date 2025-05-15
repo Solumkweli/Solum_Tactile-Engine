@@ -10,7 +10,7 @@ namespace TactileLibrary.Config
         public static readonly HashSet<string> secondary_equip_weapon_types = new HashSet<string> 
         {
             "Shield",
-            "Ring",
+            "Trinket",
         };
     }
 }
