@@ -188,13 +188,6 @@ namespace TactileLibrary
             return false;
         }
 
-        public bool is_equippable()
-        {
-            if(Config.Item.equippable_items.Contains(Id))
-                return true;
-            return false;
-        }
-
         /// <summary>
         /// Gets the value of a healing item
         /// </summary>

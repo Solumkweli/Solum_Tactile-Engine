@@ -7,9 +7,10 @@ namespace TactileLibrary.Config
 {
     public class Item
     {
-        public static readonly HashSet<int> equippable_items = new HashSet<int> 
+        public static readonly HashSet<string> secondary_equip_weapon_types = new HashSet<string> 
         {
-            100, 
+            "Shield",
+            "Ring",
         };
     }
 }

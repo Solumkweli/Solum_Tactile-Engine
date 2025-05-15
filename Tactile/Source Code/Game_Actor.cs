@@ -14,7 +14,7 @@ using TactileVersionExtension;
 namespace Tactile
 {
     enum Power_Types { Strength, Magic, Power }
-    enum Equippability { CanEquip, CannotEquip, CannotEquipPrf, CanEquipSiege, Silenced }
+    enum Equippability { CanEquip, CanSecondaryEquip, CannotEquip, CannotEquipPrf, CanEquipSiege, Silenced }
     enum StatusEffectCleared { None, AnyRemoved, NegativeRemoved }
     internal partial class Game_Actor
     {
@@ -2802,6 +2802,12 @@ namespace Tactile
                 return false;
             return is_equippable(Items[item_index].to_weapon);
         }
+        public bool is_secondary_equippable(int item_index)
+        {
+            if (!Items[item_index].is_weapon || Items[item_index].non_equipment)
+                return false;
+            return is_secondary_equippable(Items[item_index].to_weapon);
+        }
         /// <summary>
         /// Returns true if the actor qualifies for the checked weapon's rank and all Prf checks succeed
         /// </summary>
@@ -2809,6 +2815,10 @@ namespace Tactile
         public bool is_equippable(Data_Weapon weapon)
         {
             return equippable(weapon) == Equippability.CanEquip;
+        }
+        public bool is_secondary_equippable(Data_Weapon weapon)
+        {
+            return equippable(weapon) == Equippability.CanSecondaryEquip;
         }
         /// <summary>
         /// Returns true if the actor can equip the weapon, allowing siege weapons
@@ -2849,6 +2859,9 @@ namespace Tactile
 
                 if (this.silenced && weapon.blocked_by_silence)
                     return Equippability.Silenced;
+
+                if (weapon.is_secondary_equip())
+                    return Equippability.CanSecondaryEquip;
 
                 return weapon.Ballista() ?
                     Equippability.CanEquipSiege : Equippability.CanEquip;
