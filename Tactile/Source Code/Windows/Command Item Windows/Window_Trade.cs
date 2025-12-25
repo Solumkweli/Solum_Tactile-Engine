@@ -639,10 +639,10 @@ namespace Tactile.Windows.Command
                 Equipped_Tag1.draw(sprite_batch, -draw_vector());
             if (actor2.equipped > 0)
                 Equipped_Tag2.draw(sprite_batch, -draw_vector());
-            if (actor2.secondary_equipped > 0)
-                Equipped_Tag4.draw(sprite_batch, -draw_vector());
             if (actor1.secondary_equipped > 0)
                 Equipped_Tag3.draw(sprite_batch, -draw_vector());
+            if (actor2.secondary_equipped > 0)
+                Equipped_Tag4.draw(sprite_batch, -draw_vector());
         }
     }
 }
