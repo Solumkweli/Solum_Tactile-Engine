@@ -2190,12 +2190,14 @@ namespace Tactile
             }
             else
                 unequip();
-            if (secondary_equipped !=0)
+            if (secondary_equipped != 0)
             {
                 equip_secondary(secondary_equipped);
                 if (organize)
                     organize_items();
             }
+            else
+                unequip_secondary();
             skill_list_update();
         }
 
