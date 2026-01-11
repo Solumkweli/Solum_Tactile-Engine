@@ -71,7 +71,9 @@ namespace Tactile
             new Dictionary<int, HashSet<Vector2>>[Constants.Team.NUM_TEAMS + 1];
         private HashSet<Vector2> Seized_Points = new HashSet<Vector2>();
         private List<Tuple<Rectangle, string>> Area_Background = new List<Tuple<Rectangle, string>>();
-        private int Grid_Opacity = 32;
+        public bool Indoors = false;
+        public bool terrain_heals_units = false;
+        private int Grid_Opacity = 0;
         private List<Vector2>[] Light_Sources = new List<Vector2>[0];
         private int Min_Alpha = 0;
         private int Ally_Alpha;
@@ -83,6 +85,7 @@ namespace Tactile
 
         private Map_Unit_Data Unit_Data;
         private Vector2 Map_Edge_Offset;
+        private List<Map_Background> Backgrounds = new List<Map_Background> { };
         private int[,] Siege_Locations = new int[,] { };
         private int[,] Destroyable_Locations = new int[,] { };
         private HashSet<int> Waiting_Unit_Skip = new HashSet<int>();
@@ -151,6 +154,8 @@ namespace Tactile
             Seize_Points.write(writer);
             Seized_Points.write(writer);
             Area_Background.write(writer);
+            writer.Write(Indoors);
+            writer.Write(terrain_heals_units); 
             writer.Write(Grid_Opacity);
             Light_Sources.write(writer);
             writer.Write(Min_Alpha);
@@ -164,6 +169,8 @@ namespace Tactile
             writer.Write(Last_Added_Unit_Id);
 
             move_range_write(writer);
+
+            Backgrounds.write(writer);
         }
 
         public void read(BinaryReader reader)
@@ -296,6 +303,8 @@ namespace Tactile
                 Seize_Points = Seize_Points.read(reader);
             Seized_Points.read(reader);
             Area_Background.read(reader);
+            Indoors = reader.ReadBoolean();
+            terrain_heals_units = reader.ReadBoolean(); 
             Grid_Opacity = reader.ReadInt32();
             Light_Sources = Light_Sources.read(reader);
             refresh_alpha();
@@ -316,6 +325,8 @@ namespace Tactile
             Last_Added_Unit_Id = reader.ReadInt32();
 
             move_range_read(reader);
+
+            Backgrounds.read(reader);
         }
 
         public void load_suspend()
@@ -701,6 +712,15 @@ namespace Tactile
         public bool icons_visible { get { return rescue_anim_timer < Config.RESCUE_VISIBLE_TIME; } }
         public float icon_timer { get { return rescue_anim_timer / (float)Config.RESCUE_TIME ; } }
         public int icon_loops { get { return rescue_anim_loops; } }
+        public List<Map_Background> backgrounds { get { return Backgrounds; } }
+        public bool Terrain_heals_units
+        {
+            get { return terrain_heals_units; }
+            set
+            {
+                terrain_heals_units = value;
+            }
+        }
         #endregion
 
         public Game_Map()
@@ -1355,7 +1375,24 @@ namespace Tactile
             return new Color(alpha, alpha, alpha, 255);
         }
         #endregion
-
+        public void add_background(string filename, int x, int y, int parallax_factor, Background_Mode mode)
+        {
+            Backgrounds.Add(new Map_Background(filename, x, y, parallax_factor, mode));
+            sort_backgrounds_by_depth();
+        }
+        public void clear_background()
+        {
+            Backgrounds.Clear();
+        }
+        public void sort_backgrounds_by_depth()
+        {
+            Backgrounds.Sort(delegate (Map_Background x, Map_Background y)
+            {
+                if (x.depth == y.depth) return 0;
+                else if (x.depth > y.depth) return 1;
+                else return -1;
+            });
+        }
         public int width
         {
             get
@@ -2082,6 +2119,9 @@ namespace Tactile
                 if (move_sound_timers[i] > 0) move_sound_timers[i]--;
             // Move arrow update
             update_move_arrow();
+            // Scrolling backgrounds
+            foreach (Map_Background background in Backgrounds)
+                background.update();
             return true;
         }
 

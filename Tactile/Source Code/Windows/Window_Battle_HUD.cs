@@ -13,7 +13,7 @@ namespace Tactile
         readonly static Rectangle STAT_PANES = new Rectangle(0, 0, 43, 29);
         readonly static Rectangle HP_PANES = new Rectangle(0, 29, 160, 22);
         readonly static Rectangle FACE_PANES = new Rectangle(0, 117, 112, 32);
-        readonly static Rectangle SKILL_PANES = new Rectangle(120, 117, 48, 12);
+        readonly static Rectangle SKILL_PANES = new Rectangle(120, 117, 48, 16);
         readonly static Rectangle WEAPON_PANE = new Rectangle(0, 245, 117, 18);
 
         readonly static Rectangle CLASS_PANES = new Rectangle(160, 29, 84, 22);
@@ -242,7 +242,7 @@ namespace Tactile
             Weapon_Icons.Add(new Item_Icon_Sprite());
             Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
             Weapon_Names.Add(new TextSprite());
-            Weapon_Names[Weapon_Names.Count - 1].loc = new Vector2((Reverse ? 108 : Config.WINDOW_WIDTH - 92), 149 + 11);
+            Weapon_Names[Weapon_Names.Count - 1].loc = new Vector2((Reverse ? 108 : Config.WINDOW_WIDTH - 92), 149 + 12);
             Weapon_Names[Weapon_Names.Count - 1].SetFont(Config.UI_FONT, Global.Content, "White");
             Mults.Add(new Multiplier_Img());
             Mults[Mults.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
@@ -253,7 +253,7 @@ namespace Tactile
                 Weapon_Icons.Add(new Item_Icon_Sprite());
                 Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
                 Weapon_Names.Add(new TextSprite());
-                Weapon_Names[Weapon_Names.Count - 1].loc = new Vector2((!Reverse ? 108 : Config.WINDOW_WIDTH - 92), 149 + 11);
+                Weapon_Names[Weapon_Names.Count - 1].loc = new Vector2((!Reverse ? 108 : Config.WINDOW_WIDTH - 92), 149 + 12);
                 Weapon_Names[Weapon_Names.Count - 1].SetFont(Config.UI_FONT, Global.Content, "White");
                 Mults.Add(new Multiplier_Img());
                 Mults[Mults.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);

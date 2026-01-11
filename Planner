@@ -1,0 +1,216 @@
+
+TypoIntro : Book antiqua regular 14 nette T40 S20 (Ocre)
+
+Typo : Book antiqua italic 14 Nette blanc
+
+
+Treasure hunt Laurianne : 
+           
+           A Dream?
+
+Ombe se réveille sur un bord de route au portail dune maison
+
+SWITCHES
+VARIABLES -Global- 
+Sw 99 JailNote
+
+Var 99 Meredy's blindness
+
+color="#786948"
+
+
+SWITCHES
+VARIABLES -CH2- :
+
+Var 2 : Chapter advancement triggers
+Var 3 : Chapter end escape
+
+SWITCHES
+VARIABLES -STEL- :
+
+Sw 2 : Not repeat Jil Small Favor > Make it a reminder
+Sw 9 : First Talk to Jilano (To not have it repeat)
+Sw 12 : Ombe Promo Scene
+Sw 13 : CharacterSwapPrompts
+
+Var 1 : Jilano Dialogue Prompt
+Var 10 : Coming back from 1:Office 2:Harbor 3:Town--Set to 0 When bakc to Main
+Var 11 : Controlled Character 1:Ombe 2:Daren 4:Leith 15:Jin 23:Sabor etc.
+Var 12 : Office/Nala Events
+
+
+
+
+--A régler--
+
+Retirer steelbow early
+Javelin
+Piercing bow, x2 wyvern 0 mages
+Coverbattleplateform
+World map Hint of things to come only when going into a chapter
+Use Other BGM on select
+Malir Description (/) His noble past 
+
+'PROLOGUE :' 
+
+Scenes--
+Gameplay :  
+
+'CH1' : 
+Scenes:
+Gameplay: Try letting 1 fighter move down for tudel
+
+'CH2' : 
+
+Scenes :
+Escape texts
+Escaped end chapter ombe misplaced
+Gameplay :
+
+'CH3' : 
+
+Scenes :
+
+Ami appears, wait , then moves out of barn
+
+Gameplay : 
+
+Add herbs north
+
+'CH4' : 
+
+Scenes : 
+Gameplay : 
+2 enemies charge in after Imano-Elio recruitement. TO arrive at x14/15 _ y6-7
+
+--Idées Histoire--
+
+Religion-
+Religious actual customs, more important than historical sacred story
+
+Senett flees to Holin castle (with hunzo & Gavril?)
+Four Winds : Boreas, Zephyrus, Notus, Eurus >> The Boreal, The Zephyr, The Notus, The Erah 
+
+
+Jin grew up in Sirr s streets
+
+
+Tudel works for Ustirs magic "inquisition"
+He was tasked to investigate Nobles interferences in Haliva
+One of them was "the velden prepares a coup against Holin's Nobles, find the blind heir"
+Tudel turns coat at some point in Ustir (end chapter) but can be recruited again at the start
+after a display of magic from Agatha, allowing him to unbind from enemy leaders contract
+and nulifies the siege magic on the battlefield, so the group can blitz the enemy without trouble
+
+Seek the guardian at the heart of the island
+
+Attaque pirates
+kraken (wind waker musique)
+navire, tantacules
+
+Giants are like dragons, really powerfuls and try to avoid being controlled by Ustir's Magic
+Wherever Ombes party goes, they encounter terrible things that are later on blamed on them, as the repeating eyewitnesses describe her and her group as being the most likely cause of the dark events
+The pinnacle of it comes when she accidentally kills the crown prince of Halvia, in the middle of a rebellion routing mission. 
+
+The rebellious group is the same that incited Keager to make a coup in Holin, and are backed by Ustir's ruling order cast 
+
+This leads to an arc of running away from every major forces of the country, including the Stel mercenaries and Jilano. To the bliss of Yurna. In the end, Ombe proves her innocence by the trap that was
+set on her when confronted by Nalantei. In defending Ombe, the Stellian league is recognized guilty of coup, and the anti civil war treaty signed between Mercs and Nobles triggers its defense article.
+
+Refusing to back down and dismantle, Stel is attacked by Sirr's two main armies, as well as by two of the mercenary council's group. Leading to a big siege, resulting in the escape at the cost of
+nearly everyone in Stel's mercenaries. 
+
+The likes of Yurna, Jilano, and others, while Nalantei, fighting to the end realizes she can't let more losses happen, withdraws saving Ombe and 
+
+
+--Idées Gameplay--
+
+
+And story as well = Legendary weapon has to be broken to unlock its true form : Light Feather spears 
+And story again = Playable characters use variables gaining one point everytime they are deployed in a chapter, when they reach a certain level of involvement, they get their story relevance
+
+
+Magic : 
+
+Dark : takes from the oponent
+Anima : takes from the surroundings
+Light : takes from caster
+Magic overall is not only fighting magic, 
+Staves : 
+- A Hit increase staff
+
+Honor Rating ()
+
+Bribe enemies to turn them green/grey
+Bribe guards (playe -X gold + give Xgold to enemy) to steal them back with thief
+
+Staff de making a zone in which hit rates are highly reduced. Prompting the player to move forward
+
+-Chapter objective : Reach one side of the map to Fully heal Giant/Three/Dragon/any high HP pool thing >> then have him destroy enemy army in an epic rush out
+
+-Breakable wall to create rubble terrain, and obstruct like the light rune
+
+Jin and Jilano have side quest where they take a chosen ally to gain +1 night vision
+
+
+Rescue / Defend
+
+Defend is infantry's rescue- Unit goes over any ally without condition, but gets debuffs = DefenderAid - DefendedAid. (Could have the superposed map sprites instead of just the icon)
+Rescue is mounted units' - Unit takes ally to itself, only if it's a non mounted unit. 
+
+Give Drop stays the same for both
+
+Savior stays the same
+
+
+Skill -
+-Archers lvl 5  : Bows deal more damage when hit > 85
+-Archers lvl 5 : Command "Aim" > Ends turn and unit cant counter, double unit's range and reduce movement to 1 during next turn
+-Snipers Promotion  : Converts Hit points above 100 into damage (in battle)
+-Elsa personal  : Arcanic shield (Boosts defense by res/3)
+-Ami s personal : Gets a +3 damage boost in melee range
+-Swordmaster: get +1 range with weapons lighter than 10 weight
+-Command : "Duel/Defy" with 5/6 range - X% chances? provoke
+-Formationist : Bonus given to units within 3 spaces of same class branch units
+-Haste : Reduces the doubling threshold to by 1
+-Sparrow : Increases Avoid by twice the amount of Speed unit has over foe's
+-Specialist : Double unit's WTAdvantages and cancel foes's 
+-Last resort : Command skill activable when under 40% hp > unleash a stronger blow
+-Raw Strengh : Ignores weapon triangle and transfers all defense into ATK
+-Soul eater : Heals from the excess damage dealt to the enemy upon killing (Heal by Enemy remaining Hp - Dmg)
+-Uncatchable : Avoids any strike with hit lower than 50 
+-
+
+Idées : 
+
+Heavy weapons skill balance. Con - Wgt = Atk bonus / Cannot double but gains damage equals to speed
+Heavy expert : Blades, HAxes, GLances > When Atk > enemy Atk + 4 >> Landing a hit prevents doubling (does not cancel the first enemy hit)
+Shockwave : Still deals a quarter of damage when missing
+
+Make Get hit In_SKill transition
+Get_hit return
+
+
+Class specificities: 
+
+1 speedy
+1 heavy
+1 balanced / defensive
+
+(infantry)
+Swords
+Myrm > Speed
+Broad> Power
+Merc > Balance
+
+Lances
+Ombe > Speed
+Armor> Power 
+Solds> Balance
+
+Axes
+Brigd> Speed
+Fiter> Power
+Pirat> balance
+
+Global.game_state.call_block(Id);

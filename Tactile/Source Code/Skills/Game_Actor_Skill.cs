@@ -34,6 +34,8 @@ namespace Tactile
             skill_activated = false;
             Astra_Missed = false;
             Luna_Activated = false;
+            Brute_Activated = false;
+            Aim_Activated = false;
             Sol_Activated = false;
             Bastion_Activated = false;
             SprlDve_Activated = false;
@@ -66,6 +68,9 @@ namespace Tactile
                     break;
                 case "LUNA":
                     activate_luna();
+                    break;
+                case "BRUTE":
+                    activate_brute();
                     break;
                 case "SOL":
                     activate_sol();
@@ -245,6 +250,28 @@ namespace Tactile
         public void activate_luna()
         {
             Luna_Activated = true;
+            skill_activated = true;
+            //skill_flash = true; //Yeti
+        }
+
+        // Brute
+        protected bool Brute_Activated;
+        public bool brute_activated { get { return Brute_Activated; } }
+
+        public void activate_brute()
+        {
+            Brute_Activated = true;
+            skill_activated = true;
+            //skill_flash = true; //Yeti
+        }
+
+        // Aim
+        protected bool Aim_Activated;
+        public bool aim_activated { get { return Aim_Activated; } }
+
+        public void activate_aim()
+        {
+            Aim_Activated = true;
             skill_activated = true;
             //skill_flash = true; //Yeti
         }

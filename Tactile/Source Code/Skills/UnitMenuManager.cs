@@ -28,6 +28,9 @@ namespace Tactile.Menus.Map.Unit
             // Skills: Swoop
             SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Swoop),
                 (Game_Unit unit) => Swoop(unit));
+            // Skills: Aim
+            SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Aim),
+                (Game_Unit unit) => Aim(unit));
             // Skills: Trample
             SimpleCommands.Add(UnitCommandMenu.SkillCommandId(SkillMenuIds.Trample),
                 (Game_Unit unit) => Trample(unit));
@@ -129,6 +132,27 @@ namespace Tactile.Menus.Map.Unit
             attackItemWindow.help_stereoscopic = Config.MAPCOMMAND_HELP_DEPTH;
             attackItemWindow.data_stereoscopic = Config.MAPCOMMAND_DATA_DEPTH;
             Global.game_temp.temp_skill_ranges["SWOOP"] = unit.swoop_range();
+
+            var attackMenu = new AttackItemMenu(attackItemWindow, unitMenu);
+            attackMenu.IndexChanged += attackMenu_IndexChanged;
+            attackMenu.Selected += attackMenu_Selected;
+            attackMenu.Canceled += attackMenu_Canceled;
+            AddMenu(attackMenu);
+        }
+
+        // Skills: Aim
+        private void Aim(Game_Unit unit)
+        {
+            Global.game_system.play_se(System_Sounds.Confirm);
+            var unitMenu = (Menus.Peek() as UnitCommandMenu);
+            Global.game_map.range_start_timer = 0;
+            unit.aim_activated = true;
+
+            var attackItemWindow = new Window_Command_Item_Aim(unit.id, new Vector2(24, 8));
+            attackItemWindow.stereoscopic = Config.MAPCOMMAND_WINDOW_DEPTH;
+            attackItemWindow.help_stereoscopic = Config.MAPCOMMAND_HELP_DEPTH;
+            attackItemWindow.data_stereoscopic = Config.MAPCOMMAND_DATA_DEPTH;
+            Global.game_temp.temp_skill_ranges["AIM"] = unit.aim_range();
 
             var attackMenu = new AttackItemMenu(attackItemWindow, unitMenu);
             attackMenu.IndexChanged += attackMenu_IndexChanged;
@@ -243,6 +267,8 @@ namespace Tactile.Menus.Map.Unit
         {
             // Skills: Swoop
             unit.swoop_activated = false;
+            // Skills: Aim
+            unit.aim_activated = false;
             // Skills: Trample
             unit.trample_activated = false;
             // Skills: Old Swoop //@Debug
@@ -264,6 +290,12 @@ namespace Tactile.Menus.Map.Unit
                         case "SWOOP":
                             if (unitMenu.CommandAtIndex ==
                                     UnitCommandMenu.SkillCommandId(SkillMenuIds.Swoop))
+                                return true;
+                            break;
+                        // Skills: Aim
+                        case "AIM":
+                            if (unitMenu.CommandAtIndex ==
+                                    UnitCommandMenu.SkillCommandId(SkillMenuIds.Aim))
                                 return true;
                             break;
                         // Skills: Trample

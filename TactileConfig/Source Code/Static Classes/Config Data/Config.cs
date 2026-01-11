@@ -398,6 +398,8 @@ namespace Tactile
         public const int CHARACTER_TIME = 72;
         public readonly static int[] CHARACTER_IDLE_ANIM_TIMES = new int[] { 32, 4, 32, 4 }; // Time for each frame of the map sprite idle anim
         public readonly static int[] CHARACTER_IDLE_ANIM_FRAMES = new int[] { 0, 1, 2, 1 }; // Map sprite idle frame order
+        public readonly static int[] CHARACTER_IN_SKILL_ANIM_TIMES = new int[] { 32, 4, 32, 4 }; // Time for each frame of the map sprite idle anim
+        public readonly static int[] CHARACTER_IN_SKILL_ANIM_FRAMES = new int[] { 0, 1, 2, 1 }; // Map sprite garde frame order
         public readonly static int[] CHARACTER_HIGHLIGHT_ANIM_TIMES = new int[] { 20, 4, 20, 4 }; // Time for each frame of the map sprite idle anim
         public readonly static int[] CHARACTER_HIGHLIGHT_ANIM_FRAMES = new int[] { 0, 1, 2, 1 }; // Map sprite idle frame order
         public readonly static int[] CHARACTER_MOVING_ANIM_TIMES = new int[] { 13, 6, 13, 6 }; // Time for each frame of the map sprite idle anim
@@ -422,7 +424,7 @@ namespace Tactile
         #endregion
 
         #region Title
-        public const int CLASS_REEL_WAIT_TIME = 15;
+        public const int CLASS_REEL_WAIT_TIME = 30;
         public const int TITLE_GAME_START_TIME = 30;
 
         public readonly static string[] SPLASH_SCREENS = new string[] { "TactileSplashScreen" };

@@ -39,7 +39,7 @@ namespace Tactile.Menus.Title
             StartImage = new Press_Start(Global.Content.Load<Texture2D>(
                 @"Graphics/Pictures/Press Start"));
             StartImage.loc = new Vector2(Config.WINDOW_WIDTH / 2,
-                Config.WINDOW_HEIGHT - 48);
+                Config.WINDOW_HEIGHT - 68);
             StartImage.visible = false;
             StartImage.stereoscopic = Config.TITLE_CHOICE_DEPTH;
             Flash = new Sprite();

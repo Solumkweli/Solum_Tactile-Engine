@@ -41,6 +41,7 @@ namespace Tactile
         private Dictionary<int, int> Support_Progress = new Dictionary<int, int>();
         private Dictionary<int, int> Supports = new Dictionary<int, int>();
         private int Bond = -1;
+        private bool Drops_Item = false;
 
         private List<int[]> Temp_States;
         private int Needed_Levels = 0;
@@ -86,6 +87,7 @@ namespace Tactile
             Support_Progress.write(writer);
             Supports.write(writer);
             writer.Write(Bond);
+            writer.Write(Drops_Item);
         }
 
         public void read(BinaryReader reader) // Make this static, maybe? //Yeti
@@ -218,6 +220,7 @@ namespace Tactile
                     Support_Progress[pair.Key] = pair.Value;
             Supports.read(reader);
             Bond = reader.ReadInt32();
+            Drops_Item = reader.ReadBoolean();
 
             skill_list_update();
         }
@@ -524,6 +527,7 @@ namespace Tactile
 
         public List<Item_Data> items { get { return Items.GetRange(0, Global.ActorConfig.NumItems); } }
         public List<Item_Data> whole_inventory { get { return Items; } }
+        public bool drops_item { get { return Drops_Item; } set { Drops_Item = value; } }
 
         public List<ClassTypes> class_types { get { return actor_class.Class_Types; } }
 
@@ -2340,6 +2344,8 @@ namespace Tactile
         /// <param name="index">Index of the item to remove</param>
         public void discard_item(int index)
         {
+            if (index == dropped_item)
+                Drops_Item = false;
             if (index < 0)
                 return;
             if (too_many_items)
@@ -2357,13 +2363,26 @@ namespace Tactile
             while (num_items > 0)
                 discard_item(0);
         }
-
+        public int dropped_item
+        {
+            get
+            {
+                int n = 0;
+                foreach (Item_Data item in Items)
+                {
+                    if (item.Drops)
+                        return n;
+                    n++;
+                }
+                return n - 1;
+            }
+        }
         /// <summary>
         /// Removes the last item from the inventory, and then returns the data of that item
         /// </summary>
         public Item_Data drop_item()
         {
-            return drop_item(num_items - 1);
+            return drop_item(dropped_item);
         }
         /// <summary>
         /// Removes an item from the inventory, and then returns the data of that item
@@ -4051,7 +4070,13 @@ namespace Tactile
                     return true;
             return false;
         }
-
+        public bool has_guard_up() // Maybe add if scene is map 
+        {
+            foreach (int id in states)
+                if (Global.data_statuses[id].Id == 27)
+                    return true;
+            return false;
+        }
         public int status_damage()
         {
             float damage = 0;

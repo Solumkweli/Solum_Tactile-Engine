@@ -13,12 +13,15 @@ namespace Tactile
 {
     class Status_Page_1 : Status_Page
     {
+        const int STATUS_ICONS_AT_ONCE = 3;
+        const int ACTOR_STATUSES = 5;
         protected System_Color_Window Stats_Window, Items_Window;
         protected StatusStatUINode PowNode;
         private Status_Support_Background SiegeBg;
 
-        public Status_Page_1()
+        public Status_Page_1(int color_override)
         {
+            Team_Color = color_override;
             var nodes = new List<StatusUINode>();
 
             // Stats Window
@@ -27,6 +30,7 @@ namespace Tactile
             Stats_Window.width = 144;
             Stats_Window.height = 112;
             Stats_Window.stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
+            Stats_Window.color_override = color_override;
             // Stats
             for (int i = 0; i < 6; i++)
             {
@@ -55,7 +59,7 @@ namespace Tactile
                 }
 
                 nodes.Add(new StatusPrimaryStatUINode(
-                    help_label, label, stat_formula, label_color, 40));
+                    help_label, label, stat_formula, label_color, 40, color_override));
                 nodes.Last().loc = loc;
                 nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
 #if DEBUG
@@ -86,7 +90,7 @@ namespace Tactile
                         Bonus = unit.mov - unit.base_mov,
                         Cap = unit.stat_cap(Stat_Labels.Mov),
                     };
-                }, null, 40));
+                }, null, 40, color_override));
             nodes.Last().loc = Stats_Window.loc + new Vector2(72, 0 * 16 + 8);
             nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
 #if DEBUG
@@ -106,7 +110,7 @@ namespace Tactile
                         Cap = unit.stat_cap(Stat_Labels.Con),
                         IsCapped = unit.actor.get_capped(Stat_Labels.Con)
                     };
-                }, null, 40));
+                }, null, 40, color_override));
             nodes.Last().loc = Stats_Window.loc + new Vector2(72, 1 * 16 + 8);
             nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
 #if DEBUG
@@ -133,26 +137,39 @@ namespace Tactile
                 }, 40));
             nodes.Last().loc = Stats_Window.loc + new Vector2(72, 2 * 16 + 8);
             nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
-            // Trv
-            nodes.Add(new StatusTravelerUINode(
-                "Trv",
-                "Trv",
-                (Game_Unit unit) =>
+            // Status Label
+            {
+                nodes.Add(new StatusTextUINode(
+                "Cond",
+                (Game_Unit unit) => "State"));
+                nodes.Last().loc = Stats_Window.loc + new Vector2(72, 3 * 16 + 8);
+                (nodes.Last() as StatusTextUINode).set_color("Yellow");
+                nodes.Last().Size = new Vector2(32, 16);
+                nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
+
+                // Statuses
+                for (int i = 0; i < ACTOR_STATUSES; i++)
                 {
-                    if (unit.is_rescued)
-                        return Global.game_map.units[unit.rescued].actor.name;
-                    else if (unit.is_rescuing)
-                        return Global.game_map.units[unit.rescuing].actor.name;
-                    return "---";
-                },
-                (Game_Unit unit) =>
-                {
-                    if (!unit.is_rescuing)
-                        return 0;
-                    return Global.game_map.units[unit.rescuing].team;
-                }, 24));
-            nodes.Last().loc = Stats_Window.loc + new Vector2(72, 3 * 16 + 8);
-            nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
+                    int j = i;
+
+                    Vector2 loc = Stats_Window.loc + new Vector2(95 + i * 15, 55); 
+
+                    nodes.Add(new StatusStateUINode(
+                        string.Format("Status{0}", i + 1),
+                        (Game_Unit unit) =>
+                        {
+                            if (unit.actor.states.Count <= j)
+                                return new Tuple<int, int>(-1, 0);
+
+                            int id = unit.actor.states[j];
+                            int turns = unit.actor.state_turns_left(id);
+
+                            return new Tuple<int, int>(id, turns);
+                        }));
+                    nodes.Last().loc = loc;
+                    nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
+                }
+            }
             // Type
             nodes.Add(new StatusClassTypesUINode(
                 "Type",
@@ -181,9 +198,10 @@ namespace Tactile
             Items_Window.width = 144;
             Items_Window.height = Global.ActorConfig.NumItems * 16 + 16;
             Items_Window.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
+            Items_Window.color_override = color_override;
 
             // Skill Bg
-            SiegeBg = new Status_Support_Background();
+            SiegeBg = new Status_Support_Background(color_override);
             SiegeBg.loc = Items_Window.loc + new Vector2(
                 8, 8 + (Global.ActorConfig.NumItems - 1) * 16);
             SiegeBg.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
@@ -203,7 +221,7 @@ namespace Tactile
                         return new ItemState
                         {
                             Item = unit.actor.items[j],
-                            Drops = unit.drops_item && j == unit.actor.num_items - 1,
+                            Drops = unit.drops_item && j == unit.actor.dropped_item,
                             Equipped = unit.actor.equipped - 1 == j
                         };
                     }));

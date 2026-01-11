@@ -19,17 +19,21 @@ namespace Tactile
     {
         readonly static List<string> ACTIVATION_SKILLS = new List<string> { "DETER", "ADEPT", "FRENZY", "CANCEL", "LETHAL", "BASTION", "THAUM" };
         readonly static List<string> ANY_ATTACK_TYPE_ACTIVATION = new List<string> { "DETER", "CANCEL", "BASTION", "THAUM" };
-        public readonly static List<string> MASTERIES = new List<string> { "ASTRA", "LUNA", "SOL", "SPRLDVE", "NOVA", "FLARE" };
+        public readonly static List<string> MASTERIES = new List<string> { "ASTRA", "LUNA", "BRUTE", "SOL", "SPRLDVE", "NOVA", "FLARE" };
         public readonly static List<string> HEALING_MASTERIES = new List<string> { "SOL" };
-        const int MASTERY_MAX_CHARGE = 255;
+        const int MASTERY_MAX_CHARGE = 100;
         public const float MASTERY_RATE_NEW_TURN = 1f;
-        public const float MASTERY_RATE_BATTLE_END = 0.5f;
+        public const float MASTERY_RATE_BATTLE_END = 1f;
+        private int En_Garde_Damage = 0;
+        public bool Guard_Break = false;
 
         #region Serialization
         public void skills_write(BinaryWriter writer)
         {
             writer.Write(Swoop_Activated);
+            writer.Write(Aim_Activated);
             writer.Write(Trample_Activated);
+            writer.Write(En_Garde_Damage);
             Trample_Loc.write(writer);
             Called_Masteries.write(writer);
             Mastery_Gauges.write(writer);
@@ -38,7 +42,9 @@ namespace Tactile
         public void skills_read(BinaryReader reader)
         {
             Swoop_Activated = reader.ReadBoolean();
+            Aim_Activated = reader.ReadBoolean();
             Trample_Activated = reader.ReadBoolean();
+            En_Garde_Damage = reader.ReadInt32();
             Trample_Loc = Trample_Loc.read(reader);
             if (Global.LOADED_VERSION.older_than(0, 5, 6, 1)) // This is a suspend load, so this isn't needed for public release //Debug
             {
@@ -71,6 +77,10 @@ namespace Tactile
             set { actor.skill_activated = value; }
         }
 
+        #region start attack bools
+        public bool Battle_Begin = false;
+        #endregion
+
         public bool skip_skill_effect
         {
             get
@@ -82,6 +92,10 @@ namespace Tactile
 
         private void start_attack_skills(int attackIndex, Combat_Map_Object target)
         {
+            if (attackIndex == -1) 
+            {
+                Battle_Begin = true;
+            }
         }
 
         private void end_battle_skills()
@@ -90,6 +104,11 @@ namespace Tactile
             // Skills: Swoop
             Swoop_Activated = false;
             Swoop_Attacked = false;
+            Battle_Begin = false;
+            // Skills: Aim
+            Aim_Activated = false;
+            Aim_Attacked = false;
+            Battle_Begin = false;
             // Skills: Trample
             Trample_Activated = false;
             // Skills: Masteries
@@ -184,6 +203,7 @@ namespace Tactile
             List<string> result = new List<string>();
             if (actor.astra_activated) result.Add("ASTRA");
             if (actor.luna_activated) result.Add("LUNA");
+            if (actor.brute_activated) result.Add("BRUTE");
             if (actor.sol_activated) result.Add("SOL");
             if (actor.bastion_activated) result.Add("BASTION");
             if (actor.sprldve_activated) result.Add("SPRLDVE");
@@ -254,9 +274,11 @@ namespace Tactile
             {
                 // Masteries that charge
                 case "ASTRA":
-                    return stat(Stat_Labels.Spd);
+                    return stat(Stat_Labels.Skl) * 10;
                 case "LUNA":
-                    return stat(Stat_Labels.Skl);
+                    return stat(Stat_Labels.Skl) * 100;
+                case "BRUTE":
+                    return 25;
                 case "SOL":
                     return stat(Stat_Labels.Lck) * 2;
                 case "SPRLDVE":
@@ -284,6 +306,12 @@ namespace Tactile
             // Skills: Luna
             if (actor.luna_activated)
                 return Global.skill_from_abstract("LUNA").Animation_Id;
+            // Skills: Brute
+            if (actor.brute_activated)
+                return Global.skill_from_abstract("BRUTE").Animation_Id;
+            // Skills: Aim
+            if (actor.aim_activated)
+                return Global.skill_from_abstract("SOL").Animation_Id;
             // Skills: Sol
             if (actor.sol_activated)
                 return Global.skill_from_abstract("SOL").Animation_Id;
@@ -325,6 +353,11 @@ namespace Tactile
             // Skills: Luna
             if (actor.luna_activated)
                 return Global.skill_from_abstract("LUNA").Map_Anim_Id;
+            // Skills: Brute
+            if (actor.brute_activated)
+                return Global.skill_from_abstract("LUNA").Map_Anim_Id;
+            if (actor.aim_activated)
+                return Global.skill_from_abstract("SOL").Map_Anim_Id;
             // Skills: Sol
             if (actor.sol_activated)
                 return Global.skill_from_abstract("SOL").Map_Anim_Id;
@@ -403,6 +436,11 @@ namespace Tactile
                     skill_dmg -= (int)(3 * (effectiveness - 1));
                     //skill_dmg -= weapon_dmg;
                 }
+            // Skills: Precision Weapon
+            if (actor.has_skill("PWEA"))
+                    if (weapon.main_type().Name == "Knife" || weapon.main_type().Name == "Bow" || weapon.main_type().Name == "Light")
+                        weapon_dmg += ((stat(Stat_Labels.Skl) / 2)) - ((stat(Stat_Labels.Pow)) / 2);
+            // Skills: OLD Knife
             if (actor.has_skill("OLD_KNIFE"))
                 if (!magic && weapon.main_type().Name == "Sword")
                 {
@@ -431,6 +469,21 @@ namespace Tactile
                                 weapon.main_type().IsMagic && target_weapon.main_type().IsMagic)
                             skill_dmg += 5;
                     }
+            // Skills: Elite Stance
+            if (target != null && !nihil(target))
+                if (actor.has_skill("ESTANCE"))
+                    if (stat(Stat_Labels.Skl) >= (3 + target.stat(Stat_Labels.Skl)))
+                        actor_dmg += 2;
+            // Skills: Cheap Shot
+            if (target != null && !nihil(target))
+                // Can enemy counter
+                if (actor.has_skill("CHSHOT"))
+                    if (!target.can_counter(this, actor.weapon, distance.Value))
+                        actor_dmg += 2;
+            // Skills: Swift Blade
+            if (actor.has_skill("SFTBLADE"))
+                if (!magic && weapon.Max_Range == 1 && distance >= 2)
+                    weapon_dmg -= 4;
             // Skills: Colossus
             if (target != null && !nihil(target))
                 if (actor.has_skill("COLOSSUS"))
@@ -443,10 +496,9 @@ namespace Tactile
             // Skills: Mulciber's Steel
             if (actor.has_skill("MULCIBER"))
                 actor_dmg += 5;
-
-            // Activation skills
-            // Skills: Bastion
-            if (target != null)
+                // Activation skills
+                // Skills: Bastion
+                if (target != null)
                 if (target.actor.bastion_activated)
                 {
                     int dmg = (skill_dmg + weapon_dmg + actor_dmg + support_dmg) - target_def;
@@ -460,6 +512,22 @@ namespace Tactile
                     //target_def /= 2;
                     //skill_dmg += target.stat(Stat_Labels.Def) / 2;
                 }
+            // Skills: Brute
+            if (!nihil(target))
+                if (actor.brute_activated)
+                {
+                    weapon_dmg += actor.stat(Stat_Labels.Def);
+                    //target_def /= 2;
+                    //skill_dmg += target.stat(Stat_Labels.Def) / 2;
+                }
+            // Skills: Brute
+            //if (target != null)
+            //    if (target.brute)
+            //    {
+            //        skill_dmg += target_def;
+            //        //target_def /= 2;
+            //        //skill_dmg += target.stat(Stat_Labels.Def) / 2;
+            //    }
             // Skills: Spiral Dive
             if (!nihil(target))
                 if (actor.sprldve_activated)
@@ -529,6 +597,12 @@ namespace Tactile
                     int crt = stats.base_crt() + class_crt_bonus;
                     actor_hit += crt;
                 }
+            if (target != null)
+                // This reduces the attacker's hit, not the defender's avoid, so the one with the skill is the target
+                if (target.actor.has_skill("ENTROP"))
+                    if (!magic)
+                        if (!target.nihil(this))
+                            n -= 25;
             // Skills: Kamaitachi
             if (actor.has_skill("KAMAI"))
             {
@@ -652,6 +726,13 @@ namespace Tactile
                     int crt = stats.base_crt() + class_crt_bonus;
                     actor_avo += crt / 2;
                 }
+            // Skills: Flight
+            if (actor != null)
+                if (actor.has_skill("FLIGHT"))
+                { 
+                    if (terrain_is_indoors(loc))
+                        actor_avo -= 10;
+                }
             // Skills: Slow
             if (actor.has_skill("SLOW"))
                 actor_avo -= 10;
@@ -760,58 +841,78 @@ namespace Tactile
         }
 
         // Deals with added effects for skills, largely life steal
-        public void skill_effects(ref int dmg, Game_Unit target, ref Attack_Result result)
+        public void skill_effects(ref int dmg, Game_Unit target, ref Attack_Result result, int distance, Data_Weapon weapon)
         {
-            // this seems to be called twice while setting up battles, making permanent changes here doubled
-            // for example, reducing the enemy stats
-            // look into it? //Yeti
-
-            // Activation skills
-            // Skills: Nosferatu
-            if (!nihil(target))
-                if (actor.has_skill("NOSF"))
-                    result.immediate_life_steal += dmg / 2;
-            // Activation skills
-            // Skills: Sol
-            if (actor.sol_activated)
-                result.immediate_life_steal += dmg;
-            /* //Debug
-            // Skills: Sanctify (Ally buff)
-            if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(Loc))
-                foreach (int id in units_in_range(3))
-                {
-                    Game_Unit unit = Global.game_map.units[id];
-                    if (unit.actor.has_skill("SANC") && !is_attackable_team(unit))
-                    {
-                        result.immediate_life_steal += dmg / 4;
-                        break;
-                    }
-                }*/
-            // Skills: Sanctify
-            if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(target.Loc))
-                foreach (int id in target.units_in_range(3))
-                {
-                    Game_Unit unit = Global.game_map.units[id];
-                    if (unit != this && unit.actor.has_skill("SANC") && target.is_attackable_team(unit))
-                    {
-                        result.immediate_life_steal += dmg / 4;
-                        break;
-                    }
-                }
-            // Skills: Determination
-            // Determination needs to not activate if the attack is already backfiring //Debug
-            // Also decide how this interacts with silencer
-            // Also have to redo the code that calls this around checking for backfire before and after this method, lol
-            // Probably just add a new 'riposte' property and use that instead of backfire
-            if (target.actor.deter_activated)
+            target.Guard_Break = false;
+            if (target != null)
             {
-                if (target.actor.deter_counter)
+                // this seems to be called twice while setting up battles, making permanent changes here doubled
+                // for example, reducing the enemy stats
+                // look into it? //Yeti
+
+                // Activation skills
+                // Skills: Nosferatu
+                if (!nihil(target))
+                    if (actor.has_skill("NOSF"))
+                        result.immediate_life_steal += dmg / 2;
+                // Activation skills
+                // Skills: Sol
+                if (actor.sol_activated)
+                    result.immediate_life_steal += dmg;
+                /* //Debug
+                // Skills: Sanctify (Ally buff)
+                if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(Loc))
+                    foreach (int id in units_in_range(3))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if (unit.actor.has_skill("SANC") && !is_attackable_team(unit))
+                        {
+                            result.immediate_life_steal += dmg / 4;
+                            break;
+                        }
+                    }*/
+                // Skills: Sanctify
+                if (Global.scene.is_map_scene && !nihil(target) && !Global.game_map.is_off_map(target.Loc))
+                    foreach (int id in target.units_in_range(3))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if (unit != this && unit.actor.has_skill("SANC") && target.is_attackable_team(unit))
+                        {
+                            result.immediate_life_steal += dmg / 4;
+                            break;
+                        }
+                    }
+                // Skills: Determination
+                // Determination needs to not activate if the attack is already backfiring //Debug
+                // Also decide how this interacts with silencer
+                // Also have to redo the code that calls this around checking for backfire before and after this method, lol
+                // Probably just add a new 'riposte' property and use that instead of backfire
+                if (target.actor.deter_activated)
                 {
-                    result.backfire = true;
-                    dmg /= 2;
+                    if (target.actor.deter_counter)
+                    {
+                        result.backfire = true;
+                        dmg /= 2;
+                    }
+                    else
+                        dmg = 0;
                 }
-                else
-                    dmg = 0;
+                // Skills: En Garde
+                if (target.actor.has_guard_up()
+                        && target.actor.weapon != null
+                        && !actor.weapon.main_type().IsMagic)
+                {
+                    target.En_Garde_Damage += dmg;
+                    if (target.En_Garde_Damage >= (target.actor.stat(Stat_Labels.Skl))) // Distance works at 1 
+                    {
+                        KeyValuePair<int, bool> garde = new KeyValuePair<int, bool>(27, false);
+
+                        result.state_change.Add(garde);
+                        if (result.state_change.Contains(garde))
+                            target.Guard_Break = true;
+                    }
+                }
+                
             }
         }
 
@@ -952,6 +1053,9 @@ namespace Tactile
                         case "LUNA":
                             actor.activate_luna();
                             break;
+                        case "BRUTE":
+                            actor.activate_brute();
+                            break;
                         case "SOL":
                             actor.activate_sol();
                             break;
@@ -1075,6 +1179,8 @@ namespace Tactile
                 case "SPRLDVE":
                     return distance == 1 && (target == null || (target.actor.move_type != (int)MovementTypes.Flying));
                 case "ADEPT":
+                case "BRUTE":
+                    return distance == 1 && (target != null);
                 case "FRENZY":
                     return target != null && !target.is_dead;
                 default:
@@ -1089,6 +1195,7 @@ namespace Tactile
             {
                 case "ASTRA":
                 case "LUNA":
+                case "BRUTE":
                 case "SOL":
                 case "SPRLDVE":
                 case "NOVA":
@@ -1142,6 +1249,22 @@ namespace Tactile
                     if (Global.game_system.roll_rng(rate))
                     {
                         actor.activate_luna();
+                    }
+                }
+            }
+        }
+
+        // Brute
+        private void brute_hit_skill_check(bool is_hit, bool is_crt, Game_Unit target, int? distance)
+        {
+            if (actor.has_skill("BRUTE") && is_hit)
+            {
+                if (valid_mastery_target("BRUTE", target, distance))
+                {
+                    int rate = skill_rate("BRUTE");
+                    if (Global.game_system.roll_rng(rate))
+                    {
+                        actor.activate_brute();
                     }
                 }
             }
@@ -1331,6 +1454,9 @@ namespace Tactile
             // Skills: Swoop
             if (Swoop_Activated)
                 return 1;
+            // Skills: Aim
+            //if (Aim_Activated)
+            //    return 2;
             // Skills: Old Swoop //@Debug
             if (Old_Swoop_Activated)
                 return 1;
@@ -1399,6 +1525,82 @@ namespace Tactile
         public HashSet<Vector2> swoop_range()
         {
             HashSet<Vector2> range = Pathfind.get_range_around(new HashSet<Vector2> { Loc }, MAX_SWOOP_RANGE, MIN_SWOOP_RANGE, true);
+            return range;
+        }
+        #endregion
+
+        #region Aim
+        const int MIN_AIM_RANGE = 3;// 1; // increased from 1 because it allowed aiming at point blank //Yeti
+        const int MAX_AIM_RANGE = 4;
+        private bool Aim_Activated;
+        private bool Aim_Attacked;
+        public bool aim_activated
+        {
+            get { return Aim_Activated; }
+            set { Aim_Activated = value; }
+        }
+
+        public List<int>[] enemies_in_aim_range()
+        {
+            //magic_attack = true; //Debug
+            HashSet<Vector2> move_range = new HashSet<Vector2> { Loc };
+            List<int> useable_weapons = useable_aim_weapons();
+
+            List<int> targets = new List<int>();
+            List<int> weapons = new List<int>();
+            if (useable_weapons.Count == 0)
+                return new List<int>[] { targets, weapons };
+
+            // Gets targets in range
+            int min_range = MIN_AIM_RANGE;
+            int max_range = MAX_AIM_RANGE;
+            //if (actor.weapon != null)
+            //    max_range = Math.Max(min_range, actor.weapon.Max_Range);
+                targets = check_range(min_range, max_range, move_range, true,
+                    this.items[useable_weapons[0]].to_weapon, "AIM");
+                targets = targets.Distinct().ToList(); //ListOrEquals
+                                                       // Removes targets on behind walls
+                HashSet<Vector2> range = aim_range();
+                int i = 0;
+                while (i < targets.Count)
+                {
+                    Game_Unit target = Global.game_map.units[targets[i]];
+                    if (!range.Contains(target.loc) || target.nihil(this))
+                        targets.RemoveAt(i);
+                    else
+                        i++;
+                }
+
+                foreach (int index in useable_weapons)
+                    weapons.Add(actor.items[index].Id);
+            
+            return new List<int>[] { targets, weapons };
+        }
+
+        private List<int> useable_aim_weapons()
+        {
+            List<int> useable_weapons = actor.useable_weapons();
+            int i = 0;
+            while (i < useable_weapons.Count)
+            {
+                if (min_range(useable_weapons[i], "AIM") < 1 || Global.data_weapons[items[useable_weapons[i]].Id].is_siege())
+                    useable_weapons.RemoveAt(i);
+                else
+                    i++;
+            }
+            return useable_weapons;
+        }
+
+        //private int AimWeaponMaxRange(Data_Weapon weapon)
+        //{
+        //    if (actor.weapon != null)
+        //        return actor.weapon.Max_Range;
+        //    return MIN_AIM_RANGE;
+        //}
+
+        public HashSet<Vector2> aim_range()
+        {
+            HashSet<Vector2> range = Pathfind.get_range_around(new HashSet<Vector2> { Loc }, MAX_AIM_RANGE, MIN_AIM_RANGE, true);
             return range;
         }
         #endregion
@@ -1631,6 +1833,34 @@ namespace Tactile
 
                 return true;
             }
+            // Skills: 
+            if (DashActivated)
+            {
+                DashActivated = false;
+                Prev_Loc = DashPrevLoc;
+                Temp_Moved = DashTempMoved;
+
+                if (Input.ControlScheme == ControlSchemes.Buttons)
+                {
+                    Global.player.force_loc(Loc);
+                    Global.player.instant_move = true;
+                }
+
+                Global.game_map.remove_updated_move_range(Id);
+                update_move_range(Prev_Loc, Prev_Loc);
+
+                Global.game_map.clear_move_range();
+                Global.game_map.show_move_range(Id);
+                Global.game_map.show_attack_range(Id);
+
+                Global.game_system.Menu_Canto &= ~Canto_Records.Dash;
+
+                Global.game_map.move_range_visible = false;
+                Global.game_temp.menu_call = true;
+                Global.game_temp.unit_menu_call = true;
+
+                return true;
+            }
             return false;
         }
 
@@ -1664,6 +1894,12 @@ namespace Tactile
             return n;
         }
 
+        public void selfinflict()
+        {
+            // Skill : Brute
+            if (actor.brute_activated)
+                actor.add_state(25);
+        }
         public int pow_bonus_display
         {
             get
@@ -1712,6 +1948,20 @@ namespace Tactile
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
                     n += 10;
+                // Skills: Exausted
+                if (actor.has_skill("EXD"))
+                    n -= 10;
+                // Skills: High Spirits
+                if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                    foreach (int id in units_in_range(1))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if (unit.actor.has_skill("HSPIRITS") && !is_attackable_team(unit) && Global.game_state.is_player_turn)
+                        {
+                            n += 1;
+                            break;
+                        }
+                    }
                 return n;
             }
         }
@@ -1738,6 +1988,9 @@ namespace Tactile
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
                     n += 10;
+                // Skills: Blindness
+                if (actor.has_skill("BLINDNESS"))
+                    n -= 5;
                 return n;
             }
         }
@@ -1778,6 +2031,20 @@ namespace Tactile
                 // Skills: El's Passage
                 if (actor.has_skill("EL"))
                     n += 5;
+                // Skills: Exausted
+                if (actor.has_skill("EXD"))
+                    n -= 10;
+                // Skills: High Spirits
+                if (Global.scene.is_map_scene && !Global.game_map.is_off_map(Loc))
+                    foreach (int id in units_in_range(1))
+                    {
+                        Game_Unit unit = Global.game_map.units[id];
+                        if (unit.actor.has_skill("HSPIRITS") && !is_attackable_team(unit) && Global.game_state.is_player_turn)
+                        {
+                            n += 1;
+                            break;
+                        }
+                    }
                 return n;
             }
         }
@@ -1836,9 +2103,25 @@ namespace Tactile
                 if (actor.has_skill("OLD FOCUS"))
                     if (Temp_Moved <= 1 && !(Global.game_system.home_base || Global.game_system.In_Arena || Global.scene.is_test_battle))
                         n += 2;
+                // Skills: En Garde
+                if (actor.has_skill("GARDE"))
+                    if (actor.has_guard_up())
+                    {
+                        n += (actor.stat(Stat_Labels.Skl) / 2);
+                    }
                 // Skills: Fire Stone
                 if (actor.has_skill("FIRESTONE"))
                     n += 20;
+                // Skills: Fire Stone
+                if (actor.has_skill("ARCANICS"))
+                    if (actor.hp > actor.maxhp * 0.4f) 
+                    n += (stat(Stat_Labels.Res)) / 4;
+                // Skills: Exausted
+                if (actor.has_skill("EXD"))
+                    n -= 10;
+                // Skills: Defenseless
+                if (actor.has_skill("DEFLESS"))
+                    n -= actor.stat(Stat_Labels.Def);
                 return n;
             }
         }
@@ -1954,6 +2237,55 @@ namespace Tactile
             }
         }
         #endregion
+        #region Status Effects
+        public IEnumerable<int> SkillStatusInflict(Data_Weapon weapon, Game_Unit target)
+        {
+            // Skills: Toxic
+            if (actor.has_skill("TOXIC"))
+            {
+                if (weapon != null && !weapon.is_staff() && (!Global.game_system.In_Arena || !Global.scene.is_test_battle))
+                {
+                    // Poison
+                    var state = Global.data_statuses.FirstOrDefault(x => x.Value.Name == "Poison");
+                    if (state.Value != null)
+                        yield return state.Value.Id;
+
+                    //@Debug: don't need to search for the status id if you can
+                    // be certain which one it is, just yield return the id
+                    //@Debug: yield return 1;
+                }
+            }
+        }
+
+        public IEnumerable<int> SkillStatusSelfInflict(Data_Weapon weapon, Game_Unit target)
+        {
+            // Skills: Toxic
+            if (actor.has_skill("TOXIC"))
+            {
+                if (weapon != null && !weapon.is_staff() && (!Global.game_system.In_Arena || !Global.scene.is_test_battle))
+                {
+                    // Poison
+                    var state = Global.data_statuses.FirstOrDefault(x => x.Value.Name == "Poison");
+                    if (state.Value != null)
+                        yield return state.Value.Id;
+
+                    //@Debug: don't need to search for the status id if you can
+                    // be certain which one it is, just yield return the id
+                    //@Debug: yield return 1;
+                }
+            }
+        }
+
+        public bool SkillIgnoresState(int id)
+        {
+            // Poison
+            if (Global.data_statuses.ContainsKey(id) && Global.data_statuses[id].Name == "Poison")
+                // Skills: Antivenom
+                if (actor.has_skill("ANTIV"))
+                    return true;
+            return false;
+        }
+        #endregion
 
         #region Movement/Range Affecting
         private bool canto_skill()
@@ -1966,10 +2298,15 @@ namespace Tactile
                 return true;
             return false;
         }
+
+
         private bool attack_canto_skill()
         {
             // Skills: Strafing
             if (actor.has_skill("STRAFING"))
+                return true;
+            // Skills: Flashstep
+            if (actor.has_skill("FLASHSTEP"))
                 return true;
             // Skills: Trample
             if (Trample_Activated && has_canto())
@@ -1998,13 +2335,19 @@ namespace Tactile
             // Skills: Drunk
             if (actor.has_skill("DRUNK"))
                 return 1;
-            return base_vision + vision_bonus;
+            // Skills: Blindness
+            if (actor.has_skill("BLINDNESS"))
+                return 1;
+                return base_vision + vision_bonus;
         }
 
         internal bool vision_penalized()
         {
             // Skills: Drunk
             if (actor.has_skill("DRUNK"))
+                return true;
+            // Skills: Free Roam
+            if (actor.has_skill("BLINDNESS"))
                 return true;
 
             return false;
@@ -2053,6 +2396,9 @@ namespace Tactile
             // Skills: Drunk
             if (actor.has_skill("DRUNK"))
                 return false;
+            // Skills: Free roam
+            if (actor.has_skill("FREEROAM"))
+                return false;
             return true;
         }
 
@@ -2077,6 +2423,12 @@ namespace Tactile
             // Skills: El's Passage
             if (actor.has_skill("EL"))
                 n += 2;
+            // Skills: Free Roam
+            if (actor.has_skill("FREEROAM"))
+                n += 90;
+            // Skills: Aim
+            if (actor.has_skill("AIMING"))
+                n -= actor.stat(Stat_Labels.Mov) - 1;
             // Skills: Slow
             if (actor.has_skill("SLOW"))
             {
@@ -2125,8 +2477,16 @@ namespace Tactile
             if (actor.has_skill("KAMAI"))
                 if (!weapon.is_magic() && weapon.Max_Range == 1)
                     return 2;
+            // Skills: Swift Blade
+            if (actor.has_skill("SFTBLADE"))
+                if (!weapon.is_magic() && weapon.Max_Range == 1 && weapon.Wgt < 10 )
+                    return 2;
+            // Skills: Aim
+            if (actor.has_skill("AIMING"))
+                    return max_range + 3;
             return max_range;
         }
+
 
         private int Anticipation_Equip = -1;
         public void target_unit(Game_Unit attacker, Data_Weapon weapon1, int distance)
@@ -2245,6 +2605,9 @@ namespace Tactile
             // Skills: Silenced
             if (actor.has_skill("SILENCED"))
                 return false;
+            // Skills: Free Roam
+            if (actor.has_skill("FREEROAM"))
+                return false;
             return true;
         }
 
@@ -2357,6 +2720,13 @@ namespace Tactile
                 set_stat_bonus(Buffs.Pow, n);
                 set_stat_bonus(Buffs.Skl, n);
                 set_stat_bonus(Buffs.Lck, n);
+            }
+            // Skills: Hot temper
+            if (actor.has_skill("HOTTEMPER"))
+            {
+                int n = Math.Max(0, ((actor.maxhp - actor.hp) / 5));
+                set_stat_bonus(Buffs.Pow, n);
+                set_stat_bonus(Buffs.Skl, n);
             }
         }
 

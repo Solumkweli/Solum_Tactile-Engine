@@ -9,7 +9,7 @@ namespace Tactile.Constants
     public enum Options
     {
         Animation_Mode, Game_Speed, Text_Speed, Combat_Window, Unit_Window, Enemy_Window, Terrain_Window, Objective_Window,
-        Grid, Range_Preview, Hp_Gauges, Controller, Subtitle_Help, Autocursor, Auto_Turn_End, Window_Color
+        Grid, Range_Preview, Hp_Gauges, Controller, Subtitle_Help, Autocursor, Auto_Turn_End, Status_Color, Window_Color
     }
 
     public class OptionsConfig
@@ -75,6 +75,9 @@ namespace Tactile.Constants
                 new OptionsSetting( 0, "ON", "Set turn to end automatically"),
                 new OptionsSetting(23, "OFF", "Set turn to end automatically"),
                 new OptionsSetting(46, "Prompt", "Opens menu after last unit has moved") }},
+            new OptionsData { Label = "Dynamic Status Color", Options = new OptionsSetting[] {
+                new OptionsSetting( 0, "ON", "Set status screen color to match unit's team"),
+                new OptionsSetting(23, "OFF", "Set status screen color selected window color") }},
             new OptionsData { Label = "Window Color", Options = new OptionsSetting[] {
                 new OptionsSetting( 0, "1", "Change window color"),
                 new OptionsSetting(18, "2", "Change window color"),

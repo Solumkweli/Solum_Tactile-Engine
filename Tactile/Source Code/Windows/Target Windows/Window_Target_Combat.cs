@@ -89,6 +89,9 @@ namespace Tactile.Windows.Target
             // Skills: Swoop
             if (unit.swoop_activated)
                 return unit.enemies_in_swoop_range()[0];
+            // Skills: Aim
+            if (unit.aim_activated)
+                return unit.enemies_in_aim_range()[0];
             // Skills: Old Swoop
             else if (unit.old_swoop_activated)
                 return unit.enemies_in_old_swoop_range()[0];
@@ -413,6 +416,12 @@ namespace Tactile.Windows.Target
             {
                 // Redraw current attack range under targeted units
                 Global.game_temp.temp_skill_ranges["SWOOP"] = get_unit().swoop_range();
+            }
+            // Skills: Aim
+            if (get_unit().aim_activated)
+            {
+                // Redraw current attack range under targeted units
+                Global.game_temp.temp_skill_ranges["AIM"] = get_unit().aim_range();
             }
             // Skills: Old Swoop
             else if (get_unit().old_swoop_activated)

@@ -20,7 +20,8 @@ namespace Tactile
         Rescuing =  1 << 0,
         Boss =      1 << 1,
         Dangerous = 1 << 2,
-        Protect =   1 << 3
+        Protect =   1 << 3,
+        DropsItem = 1 << 4 
     }
 
     internal partial class Scene_Map : Scene_Level_Up
@@ -68,7 +69,7 @@ namespace Tactile
         // Range Textures
         protected Texture2D Move_Range_Texture, Attack_Range_Texture, Staff_Range_Texture, Talk_Range_Texture, Move_Arrow_Texture,
             All_Enemy_Attack_Range_Texture, All_Enemy_Staff_Range_Texture, Enemy_Attack_Range_Texture, Enemy_Staff_Range_Texture,
-            Rescue_Icon, Boss_Icon, DangerIcon, Talk_Icon, SupportIcons, Siege_Ammo_Icon, Flare, White_Square;
+            Rescue_Icon, Boss_Icon, DangerIcon, DropItem_Icon, Talk_Icon, SupportIcons, Siege_Ammo_Icon, Flare, White_Square;
         // Map Alpha
         protected static Texture2D Current_Map_Alpha, Map_Alpha_Target, Map_Alpha_Source;
         protected Color[] Map_Alpha_Data;
@@ -143,6 +144,7 @@ namespace Tactile
             Enemy_Staff_Range_Texture = Global.Content.Load<Texture2D>(@"Graphics/Characters/EnemyStaffRange");
             Rescue_Icon = Global.Content.Load<Texture2D>(@"Graphics/Characters/RescueIcon");
             Boss_Icon = Global.Content.Load<Texture2D>(@"Graphics/Characters/BossIcon");
+            DropItem_Icon = Global.Content.Load<Texture2D>(@"Graphics/Characters/DropItemIcon");
             DangerIcon = Global.Content.Load<Texture2D>(@"Graphics/Characters/DangerIcon");
             Talk_Icon = Global.Content.Load<Texture2D>(@"Graphics/Characters/TalkIcon");
             SupportIcons = Global.Content.Load<Texture2D>(@"Graphics/Characters/Support");
@@ -913,24 +915,25 @@ namespace Tactile
         }
 
         public void refresh_map_sprite(
-            int id, int team, string filename, bool moving)
+            int id, int team, string filename, bool moving, bool in_skill)
         {
             Character_Sprite sprite = Map_Sprites[id];
-            refresh_map_sprite(sprite, team, filename, moving);
+            refresh_map_sprite(sprite, team, filename, moving, in_skill);
         }
         public static void refresh_map_sprite(
             Character_Sprite sprite,
             int team,
             string filename,
-            bool moving)
+            bool moving,
+            bool in_skill)
         {
             sprite.finish_animation();
             Texture2D texture = get_team_map_sprite(
-                team, Game_Actors.map_sprite_name(filename, moving));
+                team, Game_Actors.map_sprite_name(filename, moving, in_skill));
             sprite.texture = texture;
             if (sprite.texture != null)
             {
-                if (!moving)
+                if (!moving) // In_skill idle has the same file size&template as base idle, map_sprite_name does the switch of graphics above
                 {
                     sprite.facing_count = 3;
                     sprite.frame_count = 3;
@@ -938,7 +941,7 @@ namespace Tactile
                         (texture.Width / sprite.frame_count) / 2,
                         (texture.Height / sprite.facing_count) - 8);
                 }
-                else
+                else // In_skill moving has the same file size&template as base moving
                 {
                     sprite.facing_count = 4;
                     sprite.frame_count = 4;
@@ -2037,6 +2040,7 @@ namespace Tactile
                         continue;
                     if (!unit.sprite_moving)
                         Map_Sprites[id].draw_status(sprite_batch, Status_Sprites, Global.game_map.display_loc, camera.matrix);
+                        continue;
                 }
                 // End sprite batch
                 sprite_batch.End();
@@ -2073,7 +2077,7 @@ namespace Tactile
                                 new Vector2(8, 8), 1f, SpriteEffects.None, 0f);
                         }
                     }
-                    // Draws rescue/boss/danger icons
+                    // Draws rescue/boss/dropitem/danger icons
                     foreach (int id in units)
                     {
                         if (!Global.game_map.units[id].visible_by())
@@ -2082,13 +2086,14 @@ namespace Tactile
                         //if (unit.is_rescuing && !unit.highlighted && unit.is_ally)
                         bool rescuing = unit.is_rescuing && !unit.highlighted; //Multi
                         bool boss = unit.boss;
+                        bool drops_item = unit.drops_item;
                         bool dangerous = false;
                         if (Config.DANGEROUS_UNIT_WARNING)
                             dangerous = Global.game_system.Selected_Unit_Id != -1 &&
                                 unit.is_attackable_team(Global.game_map.get_selected_unit()) &&
                                 unit.any_effective_weapons(Global.game_map.get_selected_unit());
 
-                        UnitIcons icon = displayed_unit_icon(rescuing, boss, dangerous);
+                        UnitIcons icon = displayed_unit_icon(rescuing, boss, drops_item, dangerous);
 
                         if (icon != UnitIcons.None)
                         {
@@ -2109,6 +2114,10 @@ namespace Tactile
                                 case UnitIcons.Boss:
                                     unit_icon_texture = Boss_Icon;
                                     unit_icon_rect = Boss_Icon.Bounds;
+                                    break;
+                                case UnitIcons.DropsItem:
+                                    unit_icon_texture = DropItem_Icon;
+                                    unit_icon_rect = DropItem_Icon.Bounds;
                                     break;
                                 case UnitIcons.Dangerous:
                                     unit_icon_texture = DangerIcon;
@@ -2251,13 +2260,15 @@ namespace Tactile
                 1f, SpriteEffects.None, 0f);
         }
 
-        private UnitIcons displayed_unit_icon(bool rescuing, bool boss, bool dangerous)
+        private UnitIcons displayed_unit_icon(bool rescuing, bool boss, bool dropsitem, bool dangerous)
         {
             UnitIcons icon_flags = UnitIcons.None;
             if (rescuing)
                 icon_flags |= UnitIcons.Rescuing;
             if (boss)
                 icon_flags |= UnitIcons.Boss;
+            if (dropsitem)
+                icon_flags |= UnitIcons.DropsItem;
             if (dangerous)
                 icon_flags |= UnitIcons.Dangerous;
 

@@ -16,6 +16,7 @@ using Tactile.Windows.UserInterface.Command;
 using TactileLibrary;
 using EnumExtension;
 using TactileWeaponExtension;
+using Tactile.Graphics.Map;
 
 namespace Tactile
 {
@@ -86,6 +87,7 @@ namespace Tactile
                     "Tried to get target window loc, but\nthere is no target window");
             }
         }
+
         public Vector2 target_window_last_target_loc
         {
             get
@@ -1254,6 +1256,21 @@ namespace Tactile
         internal static bool debug_chapter_options_blocked()
         {
             return false;
+        }
+        internal static bool ignore_victory_check()
+        {
+            string chID = Global.game_system.chapter_id;
+            switch (chID)
+            {
+                case "Ch3x":
+                    return true;
+                case "Stel":
+                    return true;
+                case "StelHarbor":
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }

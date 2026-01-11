@@ -20,7 +20,7 @@ namespace TactileLibrary.Config
         [Category("Hp"), Description(
             "HP per row of the health gauge\n" +
             "during battle scenes.")]
-        public int HpTabsPerRow = 50;
+        public int HpTabsPerRow = 40;
         [Category("Hp"), Description(
             "Width of the ticks on the HP gauge.")]
         public int HpGaugeTabWidth = 3;

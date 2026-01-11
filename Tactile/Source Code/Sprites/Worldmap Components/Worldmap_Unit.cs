@@ -53,7 +53,7 @@ namespace Tactile
             Filename = filename;
             Unit_Sprite = new Character_Sprite();
             Unit_Sprite.draw_offset = WORLDMAP_UNIT_OFFSET;
-            Scene_Map.refresh_map_sprite(Unit_Sprite, Team, Filename, false);
+            Scene_Map.refresh_map_sprite(Unit_Sprite, Team, Filename, false, false);
         }
 
         public void queue_move(int speed, Vector2[] waypoints)
@@ -149,7 +149,7 @@ namespace Tactile
                     if (Unit_Queue.Count == 0)
                         Highlighted = false;
                     Waypoints = null;
-                    Scene_Map.refresh_map_sprite(Unit_Sprite, Team, Filename, false);
+                    Scene_Map.refresh_map_sprite(Unit_Sprite, Team, Filename, false, false);
                     process_unit_queue();
                     return;
                 }
@@ -263,7 +263,7 @@ namespace Tactile
                             Waypoints[i + 1] = waypoints[i];
                         for (int i = 1; i < Waypoints.Length; i++)
                             Waypoint_Total_Length += (Waypoints[i] - Waypoints[i - 1]).Length();
-                        Scene_Map.refresh_map_sprite(Unit_Sprite, Team, Filename, true);
+                        Scene_Map.refresh_map_sprite(Unit_Sprite, Team, Filename, true, false);
                         return;
                     case Worldmap_Unit_Queue.Idle:
                         Highlighted = false;

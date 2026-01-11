@@ -291,7 +291,7 @@ namespace Tactile.State
                                 else
                                 {
                                     // If the cantoing unit used up all its movement
-                                    if (!unit.has_canto() || unit.full_move() || Game_AI.UNMOVING_MISSIONS.Contains(unit.ai_mission) ||
+                                    if ((!unit.has_canto() && !unit.has_attack_canto()) || unit.full_move() || Game_AI.UNMOVING_MISSIONS.Contains(unit.ai_mission) ||
                                             Game_AI.IMMOBILE_MISSIONS.Contains(unit.mission) || Game_AI.MOVE_TO_TILE_MISSIONS.Contains(unit.mission))
                                         // After this the phase will still be the same so we will return to this block when the unit has finished waiting
                                         unit.start_wait();

@@ -30,6 +30,22 @@ namespace Tactile
                 }
                 sprite_batch.End();
             }
+            // Skills: Aim
+            // Temp Aim Range
+            if (Global.game_temp.temp_skill_ranges.ContainsKey("AIM") &&
+                UnitMenu.ShowSkillRange("AIM"))
+            {
+                sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                int opacity = 144;
+                Color color = new Color(opacity, opacity, opacity, opacity);
+                foreach (Vector2 loc in Global.game_temp.temp_skill_ranges["AIM"])
+                {
+                    sprite_batch.Draw(Attack_Range_Texture,
+                        loc * TILE_SIZE + move_range_draw_vector() - Global.game_map.display_loc + new Vector2(0, width - timer),
+                        rect, color);
+                }
+                sprite_batch.End();
+            }
             // Skills: Trample
             // Temp Swoop Range
             if (Global.game_temp.temp_skill_ranges.ContainsKey("TRAMPLE") &&

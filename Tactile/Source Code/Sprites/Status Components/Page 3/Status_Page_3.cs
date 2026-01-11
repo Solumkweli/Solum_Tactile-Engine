@@ -13,8 +13,6 @@ namespace Tactile
 {
     class Status_Page_3 : Status_Page
     {
-        const int STATUS_ICONS_AT_ONCE = 3;
-        const int ACTOR_STATUSES = 5;
 
         private System_Color_Window Bonuses_Window, Supports_Window;
         private Status_Bonus_Background Bonus_Bg;
@@ -22,7 +20,7 @@ namespace Tactile
         // Supports
         private Status_Support_List Supports;
 
-        public Status_Page_3()
+        public Status_Page_3(int color_override)
         {
             var nodes = new List<StatusUINode>();
 
@@ -32,36 +30,29 @@ namespace Tactile
             Bonuses_Window.width = 144;
             Bonuses_Window.height = 112;
             Bonuses_Window.stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
-            // Status Label
-            nodes.Add(new StatusTextUINode(
-                "Cond",
-                (Game_Unit unit) => "Status"));
+            Bonuses_Window.color_override = color_override;
+            // Trv
+            { nodes.Add(new StatusTravelerUINode(
+                "Trv",
+                "Trv",
+                (Game_Unit unit) =>
+                {
+                    if (unit.is_rescued)
+                        return Global.game_map.units[unit.rescued].actor.name;
+                    else if (unit.is_rescuing)
+                        return Global.game_map.units[unit.rescuing].actor.name;
+                    return "---";
+                },
+                (Game_Unit unit) =>
+                {
+                    if (!unit.is_rescuing)
+                        return 0;
+                    return Global.game_map.units[unit.rescuing].team;
+                }, 24));
             nodes.Last().loc = Bonuses_Window.loc + new Vector2(16, 8);
             (nodes.Last() as StatusTextUINode).set_color("Yellow");
             nodes.Last().Size = new Vector2(32, 16);
             nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
-
-            // Statuses
-            for (int i = 0; i < ACTOR_STATUSES; i++)
-            {
-                int j = i;
-
-                Vector2 loc = Bonuses_Window.loc + new Vector2(48 + i * 16, 8);
-
-                nodes.Add(new StatusStateUINode(
-                    string.Format("Status{0}", i + 1),
-                    (Game_Unit unit) =>
-                    {
-                        if (unit.actor.states.Count <= j)
-                            return new Tuple<int, int>(-1, 0);
-
-                        int id = unit.actor.states[j];
-                        int turns = unit.actor.state_turns_left(id);
-
-                        return new Tuple<int, int>(id, turns);
-                    }));
-                nodes.Last().loc = loc;
-                nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
             }
 
             // Bond
@@ -140,7 +131,7 @@ namespace Tactile
                 nodes.Last().stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
             }
             // Bonus Bg
-            Bonus_Bg = new Status_Bonus_Background();
+            Bonus_Bg = new Status_Bonus_Background(color_override);
             Bonus_Bg.loc = Bonuses_Window.loc + new Vector2(8, 24);
             Bonus_Bg.stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
 
@@ -148,6 +139,7 @@ namespace Tactile
             Supports_Window = new System_Color_Window();
             Supports_Window.loc = new Vector2(168, 80);
             Supports_Window.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
+            Supports_Window.color_override = color_override;
             // Affinity
             nodes.Add(new StatusAffinityUINode(
                 "Affin",
@@ -159,7 +151,7 @@ namespace Tactile
             Supports.loc = Supports_Window.loc + new Vector2(32, 24);
             Supports.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
             // Support Bg
-            Support_Bg = new Status_Support_Background();
+            Support_Bg = new Status_Support_Background(color_override);
             Support_Bg.loc = Supports_Window.loc + new Vector2(8, 24);
             Support_Bg.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
             // Supports Window Size

@@ -164,6 +164,7 @@ namespace Tactile
         }
         internal static void UpdateSpriteFrame(Graphics.Map.Character_Sprite sprite, int facing, int frame)
         {
+         
             sprite.frame = (facing / 2 - 1) * sprite.frame_count + frame;
         }
         #endregion

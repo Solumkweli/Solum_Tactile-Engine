@@ -17,7 +17,7 @@ namespace Tactile.Constants
 #endif
         public const int ALPHA_MAX = 12 * ALPHA_GRANULARITY;
 
-        public const bool FOW_TERRAIN_DATA = false; // Is terrain info data visible when moving the cursor on fog tiles, generally turn off only if doing Thracia fog
+        public const bool FOW_TERRAIN_DATA = true; // Is terrain info data visible when moving the cursor on fog tiles, generally turn off only if doing Thracia fog
 
         public const int AI_WAIT_TIME = 20;
         public const int SKIP_AI_TURN_HOLD_TIME = 8;
@@ -45,9 +45,9 @@ namespace Tactile.Constants
 
         public const bool FORCE_BOSS_ANIMATIONS = true;
 #if DEBUG
-        public const bool CONTINUE_BOSS_THEME = false; // Boss themes continue on the map after combat?
+        public const bool CONTINUE_BOSS_THEME = true; // Boss themes continue on the map after combat?
 #else
-        public const bool CONTINUE_BOSS_THEME = false; // Boss themes continue on the map after combat?
+        public const bool CONTINUE_BOSS_THEME = true; // Boss themes continue on the map after combat?
 #endif
     }
 }

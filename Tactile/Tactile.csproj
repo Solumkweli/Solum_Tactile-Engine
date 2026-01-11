@@ -206,6 +206,7 @@
     <Compile Include="Source Code\Saving\Serialization\SaveSerializer.cs" />
     <Compile Include="Source Code\Saving\Serialization\SerializerData.cs" />
     <Compile Include="Source Code\Saving\Serialization\SerializerMetaData.cs" />
+    <Compile Include="Source Code\Scenes\Scene_Title\Map_Background.cs" />
     <Compile Include="Source Code\Services\Audio\MusicInstance.cs" />
     <Compile Include="Source Code\Services\Audio\MusicPlayer.cs" />
     <Compile Include="Source Code\Services\Input\IInputService.cs" />
@@ -348,6 +349,7 @@
     <Compile Include="Source Code\Sprites\Status Components\Page 3\Status_Support_List.cs" />
     <Compile Include="Source Code\Sprites\Text\Battle_Hit_Number.cs" />
     <Compile Include="Source Code\Sprites\Text\Quick_Stat_Up_Num.cs" />
+    <Compile Include="Source Code\Windows\Command Item Windows\Window_Command_Item_Aim.cs" />
     <Compile Include="Source Code\Windows\Command Windows\WindowCommandSupportViewerActor.cs" />
     <Compile Include="Source Code\Windows\IndexScrollComponent.cs" />
     <Compile Include="Source Code\Windows\Map Menus\UnitScreenHeader.cs" />

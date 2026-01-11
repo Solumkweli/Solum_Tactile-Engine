@@ -161,6 +161,9 @@
     <Compile Include="Source Code\Game1.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="FodyWeavers.xml" />
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png" />

@@ -148,6 +148,7 @@ namespace Tactile.Calculations.Stats
                     ref target_def, weapon, target, weapon2, tri, magic_attack,
                     Distance, effectiveness);
             }
+            attacker.selfinflict();
             total_damage = actor_dmg + weapon_dmg + skill_dmg + support_dmg - target_def;
             int result = attacker.dmg_target_skill(target, weapon, Distance, Math.Max(0, total_damage));
             return result;

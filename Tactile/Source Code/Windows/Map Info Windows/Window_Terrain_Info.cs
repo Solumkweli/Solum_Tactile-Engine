@@ -32,6 +32,7 @@ namespace Tactile.Windows.Map.Info
             loc = new Vector2(-86, TOP_Y);
         }
 
+
         protected override void initialize_images()
         {
             Window_Img = new Terrain_Window();
@@ -102,9 +103,18 @@ namespace Tactile.Windows.Map.Info
         {
             set_name(Global.data_terrains[id].Name);
         }
+
         protected void set_name(string name)
         {
+            if (Global.game_map.terrain_indoors(Global.player.loc))
+                Name.text = name + " #";
+            else
             Name.text = name;
+            if (Global.game_map.terrain_heals_test())//Global.game_map.terrain_heals_test(loc))
+                Name.SetFont(Config.UI_FONT, Global.Content, "Green");
+            else
+                Name.SetFont(Config.UI_FONT, Global.Content, "White");
+
             Name.offset.X = Name.text_width / 2;
         }
 

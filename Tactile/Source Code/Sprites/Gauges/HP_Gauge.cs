@@ -22,7 +22,7 @@ namespace Tactile
                 MaxHp = (int)MathHelper.Clamp(value, 1,
                     Global.BattleSceneConfig.HpTabsPerRow *
                     Global.BattleSceneConfig.MaxHpRows);
-                loc.Y = BASE_Y - (int)((7 * ((MaxHp - 1) /
+                loc.Y = BASE_Y + (int)((7 * ((MaxHp - 1) /
                     Global.BattleSceneConfig.HpTabsPerRow)) / 2.0);
             }
         }
@@ -127,9 +127,9 @@ namespace Tactile
                     for (int i = 0; i < MaxHp; i++)
                     {
                         tab_location = new Vector2(
-                            (i % Global.BattleSceneConfig.HpTabsPerRow) * (tabWidth - 1),
-                            (i / Global.BattleSceneConfig.HpTabsPerRow) * (tabHeight + 1));
-                        if (i < Hp)
+                            (i % Global.BattleSceneConfig.HpTabsPerRow) * (tabWidth - 1),  // (???) * (Spacebetween tabs)
+                            (i / Global.BattleSceneConfig.HpTabsPerRow) * (tabHeight - 13));
+                    if (i < Hp)
                             sprite_batch.Draw(texture, this.loc + draw_vector() + tab_location - draw_offset,
                                 empty_rect, tint, angle, offset, scale,
                                 mirrored ? SpriteEffects.FlipHorizontally : SpriteEffects.None, Z);

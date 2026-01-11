@@ -1080,6 +1080,26 @@ namespace Tactile
             #endregion
         };
         #endregion
+        /*#region Sprite in skill
+        protected static Dictionary<int, Map_Unit_Animation_Data> SPRITE_IN_SKILLS_ANIMS = new Dictionary<int, Map_Unit_Animation_Data>
+        {
+            #region 22: Soldier Mapsprite in skill
+            { 22, new Map_Unit_Animation_Data { data = new List<Map_Unit_Animation_Data_Frame>
+                {
+                    new Map_Unit_Animation_Data_Frame { Frame_Index = 8, Time = 20 },
+                    new Map_Unit_Animation_Data_Frame { Frame_Index = 7, Time =  6 },
+                    new Map_Unit_Animation_Data_Frame { Frame_Index = 3, Time = 15 },
+                    new Map_Unit_Animation_Data_Frame { Frame_Index = 4, Time =  3 },
+                    new Map_Unit_Animation_Data_Frame { Frame_Index = 5, Time = 30 },
+                },
+                processing_data = new List<KeyValuePair<int,string[]>> {
+                    new KeyValuePair<int, string[]>(37, new string[] { "s", "Minstrel_Strum" })
+                }
+            }},
+            #endregion
+        };
+        #endregion*/
+
 
         public static Map_Unit_Animation_Data unit_data(int type, int id)
         {
@@ -1090,6 +1110,10 @@ namespace Tactile
                     if (DANCE_ANIMS.ContainsKey(id))
                         return DANCE_ANIMS[id];
                     break;
+                /*case 2:
+                    if (SPRITE_IN_SKILLS_ANIMS.ContainsKey(id))
+                        return SPRITE_IN_SKILLS_ANIMS[id];
+                    break;*/
                 // Sacrifice I guess? //Yeti
                 case 2:
                     break;
@@ -1118,6 +1142,7 @@ namespace Tactile
         public string Image_Name;
         public Vector2 Image_Cells;
         public bool Moving;
+        public bool Skilling;
         public int Time;
         public int Frame_Index;
     }

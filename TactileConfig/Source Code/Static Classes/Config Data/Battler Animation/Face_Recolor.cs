@@ -6,7 +6,7 @@ namespace Tactile
     public enum Face_Color_Keys
     {
         Outline, Skin1, Skin2, Skin3, Skin4, Skin5, Main1, Main2, Main3, Main4, Main5,
-        Hair1, Hair2, Hair3, Tert1, Tert2, Tert3, Tert4
+        Hair1, Hair2, Hair3, Tert1, Tert2, Tert3, Tert4, Four1, Four2, Four3
     }
     public class Face_Recolor
     {
@@ -31,6 +31,33 @@ namespace Tactile
                     { Face_Color_Keys.Hair1,   new Color(176, 120,  32)},
                     { Face_Color_Keys.Hair2,   new Color(208, 168,  32)},
                     { Face_Color_Keys.Hair3,   new Color(248, 208,  64)},
+                    { Face_Color_Keys.Tert1,   new Color(112, 104, 120)},
+                    { Face_Color_Keys.Tert2,   new Color(144, 136, 152)},
+                    { Face_Color_Keys.Tert3,   new Color(168, 168, 176)},
+                    { Face_Color_Keys.Tert4,   new Color(216, 216, 224)},
+                    { Face_Color_Keys.Four1,   new Color(173, 171, 169)},
+                    { Face_Color_Keys.Four2,   new Color(134, 125, 133)},
+                    { Face_Color_Keys.Four3,   new Color(115, 101, 114)}
+                }
+            },
+            #endregion
+            #region Velden
+            {"Velden", new Dictionary<Face_Color_Keys, Color>
+                {
+                    { Face_Color_Keys.Outline, new Color( 88,  64,  96)},
+                    { Face_Color_Keys.Skin1,   new Color(112,  88,  88)},
+                    { Face_Color_Keys.Skin2,   new Color(184, 120,  56)},
+                    { Face_Color_Keys.Skin3,   new Color(232, 176,  88)},
+                    { Face_Color_Keys.Skin4,   new Color(240, 224, 128)},
+                    { Face_Color_Keys.Skin5,   new Color(248, 248, 200)},
+                    { Face_Color_Keys.Main1,   new Color(104, 72, 72)},
+                    { Face_Color_Keys.Main2,   new Color(131, 90, 90)},
+                    { Face_Color_Keys.Main3,   new Color(153,  106, 106)},
+                    { Face_Color_Keys.Main4,   new Color(184,  124, 120)},
+                    { Face_Color_Keys.Main5,   new Color(208,  175, 168)},
+                    { Face_Color_Keys.Hair1,   new Color(94, 75,  57)},
+                    { Face_Color_Keys.Hair2,   new Color(127, 87,  49)},
+                    { Face_Color_Keys.Hair3,   new Color(168, 120,  64)},
                     { Face_Color_Keys.Tert1,   new Color(112, 104, 120)},
                     { Face_Color_Keys.Tert2,   new Color(144, 136, 152)},
                     { Face_Color_Keys.Tert3,   new Color(168, 168, 176)},

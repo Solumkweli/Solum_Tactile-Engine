@@ -13,6 +13,8 @@ namespace Tactile.Menus.Map.Unit
         Trample = 3,
         Sacrifice = 4,
         Refuge = 5,
+        Aim = 6,
+        Defend = 7,
         OldSwoop = 20
     }
 
@@ -42,6 +44,8 @@ namespace Tactile.Menus.Map.Unit
             //   103 = Trample
             //   104 = Sacrifice
             //   105 = Refuge
+            //   106 = Aim
+            //   107 = Defend
             //   120 = Old Swoop //Debug
             if (CantoAllowsNormalActions(Canto))
             {
@@ -61,8 +65,8 @@ namespace Tactile.Menus.Map.Unit
                     if (canRescue)
                     {
                         int index = commands.IndexOf("Rescue");
-                        commands.Insert(index + 1, "Shelter");
-                        AddSkillIndex(index, SkillMenuIds.Shelter);
+                        commands.Insert(index + 1, "Defend");
+                        AddSkillIndex(index, SkillMenuIds.Defend);
                     }
                 }
                 {
@@ -90,6 +94,8 @@ namespace Tactile.Menus.Map.Unit
                             index = itemIndex;
                         // Try placing after rescue
                         int rescueIndex = commands.IndexOf("Rescue");
+                        //If Mounted = "Rescue
+                        //  Else Defend
                         if (rescueIndex >= 0)
                             index = rescueIndex + 1;
                         // Try placing after shelter
@@ -126,6 +132,20 @@ namespace Tactile.Menus.Map.Unit
                         int index = commands.IndexOf("Attack");
                         commands.Insert(index + 1, "Swoop");
                         AddSkillIndex(index, SkillMenuIds.Swoop);
+                    }
+                }
+                // Skills: Aim
+                if (unit.actor.has_skill("AIM"))
+                {
+                    List<int>[] ary = unit.enemies_in_aim_range();
+                    List<int> enemyRange = ary[0];
+                    if (enemyRange.Count > 0 && unit.Temp_Moved < 2)
+                    {
+                        Global.game_temp.temp_skill_ranges["AIM"] = unit.aim_range();
+                        Global.game_map.range_start_timer = 0;
+                        int index = commands.IndexOf("Attack");
+                        commands.Insert(index + 1, "Aim");
+                        AddSkillIndex(index, SkillMenuIds.Aim);
                     }
                 }
                 // Skills: Trample

@@ -8,8 +8,8 @@ namespace Tactile
     class Title_Background : Sprite
     {
         const int BG_TEXTURE_COLUMNS = 5;
-        const int BG_UPDATE = 2;
-        const int BG_FRAMES = 16;
+        const int BG_UPDATE = 5;
+        const int BG_FRAMES = 20;
         const int PILLAR_UPDATE = 2;
         const int INITIAL_DISTANCE = -260;
         const float SPACING = 2;

@@ -99,8 +99,12 @@ namespace Tactile
                 return new List<Tuple<int, List<int>>> {
                     Tuple.Create(1, Global.animation_group("Effects").list_add(new List<int> { 1 })) // Dust
             };
-
+            if (anim_id == Global.animation_group("Pirate-Axe") + 35) // Pirate Get_hit loose guard
+                return new List<Tuple<int, List<int>>> {
+                    Tuple.Create(1, Global.animation_group("Effects").list_add(new List<int> { 32 })) // Dust
+            };
             // Corsair
+
             if (anim_id == Global.animation_group("Corsair-Axe") + 11) // Corsair Attack
                 return new List<Tuple<int, List<int>>> {
                     Tuple.Create(26, Global.animation_group("Effects").list_add(new List<int> { 1 })) // Dust

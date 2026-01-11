@@ -41,6 +41,7 @@ namespace Tactile
             }
             //@Yeti: handle weapon type replacement skills better than hardcoding
             bool knife = (actor != null && actor.has_skill("KNIFE") && weapon.main_type().Name == "Sword" && !weapon.is_magic());
+            bool sklweapon = (actor != null && actor.has_skill("PWEA") && weapon.main_type().Name == "Knife" || weapon.main_type().Name == "Bow" || weapon.main_type().Name == "Light");
             bool crossbow = (actor != null && actor.has_skill("CROSSBOW") && weapon.main_type().Name == "Bow" && !weapon.Ballista());
 
             Labels[0].text = weapon.type;
@@ -119,6 +120,31 @@ namespace Tactile
             if (!weapon.is_staff())
             {
                 Stats[2].text = weapon.Mgt.ToString();
+                if (sklweapon)
+                {
+                    int skillbonus = (actor.stat(Stat_Labels.Skl) / 2) - (actor.stat(Stat_Labels.Pow) / 2);
+                    if (skillbonus < 0)
+                    {
+                        Stat_Bonuses.Add(new TextSprite());
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].loc = Stats[2].loc + new Vector2(0, 0);
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].SetFont(Config.UI_FONT + "Bonus", Global.Content, "Red", Config.UI_FONT);
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].text = skillbonus.ToString();
+                    }
+                    else if (skillbonus > 0)
+                    {
+                        Stat_Bonuses.Add(new TextSprite());
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].loc = Stats[2].loc + new Vector2(0, 0);
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].SetFont(Config.UI_FONT + "Bonus", Global.Content, "Green", Config.UI_FONT);
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].text = "+" + skillbonus.ToString();
+                    }
+                    else if (skillbonus == 0)
+                    {
+                        Stat_Bonuses.Add(new TextSprite());
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].loc = Stats[2].loc + new Vector2(0, 0);
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].SetFont(Config.UI_FONT + "Bonus", Global.Content, "HelpBlue", Config.UI_FONT);
+                        Stat_Bonuses[Stat_Bonuses.Count - 1].text = "";
+                    }
+                }
                 if (knife)
                 {
                     Stat_Bonuses.Add(new TextSprite());

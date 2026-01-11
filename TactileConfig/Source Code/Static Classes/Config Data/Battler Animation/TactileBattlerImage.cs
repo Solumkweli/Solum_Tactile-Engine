@@ -10,7 +10,7 @@ using IntExtension;
 
 namespace Tactile
 {
-    public class TactileBattlerImage
+    public class TactileBattlerImage 
     {
         const int IDLE_ANIM = 1;
         const int AVOID_ANIM = 2;
@@ -29,7 +29,6 @@ namespace Tactile
             { 88, new int[] {  6,  6 }} // Justice
         };
         #endregion
-
         public static Battle_Animation_Association_Data animation_set(Animation_Setup_Data battler)
         {
             if (Animation_Battler_Data != null)
@@ -37,6 +36,8 @@ namespace Tactile
 
             return null;
         }
+
+
 
         #region Animation Values
         #region Attack
@@ -150,6 +151,24 @@ namespace Tactile
             offset += ATTACK_ANIM_OFFSET;
             switch (battler.Class_Id)
             {
+                #region 20: Mercenary
+                case 20:
+                    // En Garde
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int>() { 23 });
+                    }
+                    break;
+                #endregion
+                #region 26: Pirate
+                case 26:
+                    // En Garde
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int>() { 33 });
+                    }
+                    break;
+                #endregion
                 #region 51: Swordmaster
                 case 51:
                     // Astra
@@ -205,12 +224,29 @@ namespace Tactile
         {
             switch (battler.Class_Id)
             {
+                #region 20: Mercenary
+                case 20:
+                    // En Garde
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int>() { 6 });
+                    }
+                    break;
+                #endregion
+                #region 26: Pirate
+                case 26:
+                    // En Garde
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int>() { 6 });
+                    }
+                    break;
+                    #endregion
             }
 
             var anim_set = animation_set(battler);
             if (anim_set != null)
                 return offset.list_add(anim_set.Idle);
-
             return offset.list_add(new List<int> { IDLE_ANIM });
         }
         /// <summary>
@@ -282,6 +318,36 @@ namespace Tactile
 
             }
 
+            switch (battler.Class_Id)
+            {
+                #region 20: Mercenary
+                case 20:
+                    // En Garde
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int>() { 25 });
+                    }
+                    if (!battler.Has_Guard_Up && battler.Guard_Break) 
+                    {
+                        return offset.list_add(new List<int>() { 24 });
+                    }
+                    break;
+                #endregion
+                #region 26: Pirate
+                case 26:
+                    // En Garde
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int>() { 34 });
+                    }
+                    if (!battler.Has_Guard_Up && battler.Guard_Break) //&& battler.Sprite_In_Skill)
+                    {
+                        return offset.list_add(new List<int>() { 35 });
+                    }
+                    break;
+                #endregion
+            }
+
             var anim_set = animation_set(battler);
             if (anim_set != null)
             {
@@ -302,6 +368,14 @@ namespace Tactile
             offset += ATTACK_ANIM_OFFSET;
             switch (battler.Class_Id)
             {
+                #region 20: Mercenary
+                case 20:
+                    if (battler.Has_Guard_Up)
+                    {
+                        return offset.list_add(new List<int> { 7 });
+                    }
+                    break;
+                #endregion
                 #region 61: Dragon Master
                 case 61:
                     if (battler.Swoop_Activated)
@@ -389,6 +463,7 @@ namespace Tactile
                     return offset.list_add(distance == 1 ? new List<int>() { 5, (hit ? 7 : 3) } : new List<int>() { 2, (hit ? 7 : 3) });
                 case 103: // Arcfire
                     return offset.list_add(distance == 1 ? new List<int>() { 5, (hit ? 9 : 3) } : new List<int>() { 2, (hit ? 9 : 3) });
+                case 26: // Thunder Edge
                 case 111: // Thunder
                     return offset.list_add(distance == 1 ? new List<int>() { 64 } : new List<int>() { 62 });
                 case 70: // Bolt Axe
@@ -405,6 +480,8 @@ namespace Tactile
                     return offset.list_add(new List<int>() { distance == 1 ? 131 : 126, hit ? 127 : 128 });
                 case 123: // Arcwind
                     return offset.list_add(new List<int>() { distance == 1 ? 131 : 126, hit ? 127 : 128 }); //Yeti
+                case 22: // Blast Sword
+                    return offset.list_add(distance == 1 ? new List<int>() { 333 } : new List<int>() { 333 });
                 case 12: // Light Brand
                 case 131: // Lightning
                     return offset.list_add(distance == 1 ? new List<int>() { 183 } : new List<int>() { 181 });
@@ -531,6 +608,7 @@ namespace Tactile
                     return offset.list_add(hit ? new List<int>() { 8 } : new List<int>() { 6 });
                 case 103: // Arcfire
                     return offset.list_add(hit ? new List<int>() { 10 } : new List<int>() { 6 });
+                case 26: // Thunder Edge
                 case 111: // Thunder
                     return offset.list_add(new List<int>() { 63 });
                 case 70: // Bolt Axe
@@ -547,6 +625,8 @@ namespace Tactile
                     return offset.list_add(hit ? new List<int>() { 129 } : new List<int>() { 130 });
                 case 123: // Arcwind
                     return offset.list_add(hit ? new List<int>() { 129 } : new List<int>() { 130 }); //Yeti
+                case 22: // Blast Sword
+                    return offset.list_add(new List<int>() { 334 });
                 case 12: // Light Brand
                 case 131: // Lightning
                     return offset.list_add(new List<int>() { 182 });
@@ -739,6 +819,9 @@ namespace Tactile
         public bool Astra_Missed { get; protected set; }
         public int Astra_Count { get; protected set; }
         public bool Swoop_Activated { get; protected set; }
+        public bool Aim_Activated { get; protected set; }
+        public bool Has_Guard_Up { get; protected set; }
+        public bool Guard_Break { get; protected set; }
     }
 
     public class Test_Animation_Setup_Data : Animation_Setup_Data

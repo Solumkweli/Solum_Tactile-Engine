@@ -87,7 +87,7 @@ namespace Tactile
         protected bool Victory;
         protected bool Failure;
         protected List<Event_Processor> Events = new List<Event_Processor>();
-        public readonly int Unit_Highlight_Anim_Time, Unit_Moving_Anim_Time;
+        public readonly int Unit_Highlight_Anim_Time, Unit_Moving_Anim_Time, Unit_In_Skill_Anim_Time;
 
         #region Serialization
         public void write(BinaryWriter writer)
@@ -346,7 +346,25 @@ namespace Tactile
                 return Config.CHARACTER_IDLE_ANIM_FRAMES[index];
             }
         }
-
+        public int unit_anim_in_skil_idle_frame
+        {
+            get
+            {
+                int anim_count = Character_Anim_Count;
+                int index = 0;
+                for (int i = 0; i < Config.CHARACTER_IN_SKILL_ANIM_TIMES.Length; i++)
+                {
+                    if (anim_count < Config.CHARACTER_IN_SKILL_ANIM_TIMES[i])
+                    {
+                        index = i;
+                        break;
+                    }
+                    else
+                        anim_count -= Config.CHARACTER_IN_SKILL_ANIM_TIMES[i];
+                }
+                return Config.CHARACTER_IN_SKILL_ANIM_FRAMES[index];
+            }
+        }
         public bool preparations
         {
             get { return Preparations; }
@@ -448,6 +466,9 @@ namespace Tactile
             Unit_Moving_Anim_Time = 0;
             foreach (int time in Config.CHARACTER_MOVING_ANIM_TIMES)
                 Unit_Moving_Anim_Time += time;
+            Unit_In_Skill_Anim_Time = 0;
+            foreach (int time in Config.CHARACTER_IN_SKILL_ANIM_TIMES)
+                Unit_In_Skill_Anim_Time += time;
             reset();
         }
 

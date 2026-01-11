@@ -12,7 +12,7 @@ namespace TactileLibrary
 {
     public enum ChapterLabels
     {
-        Chapter, Act, Part, Paralogue, ExMap, TrialMap
+        Chapter, Act, Part, Paralogue, ExMap, TrialMap, Stel
     }
 
     public class Data_Chapter : TactileDataContent

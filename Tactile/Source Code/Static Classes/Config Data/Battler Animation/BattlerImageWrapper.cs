@@ -122,7 +122,6 @@ namespace Tactile
             return TactileBattlerImage.pre_battle_animation_value(
                 animation_processor(battler, distance), battler.AnimationGroupOffset);
         }
-
         #region Spells
         /// <summary>
         /// Returns the animation numbers of the given spell's start up

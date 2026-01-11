@@ -213,10 +213,13 @@ namespace Tactile
         /// </summary>
         public static string map_sprite_name(
             string name,
-            bool moving)
+            bool moving, bool in_skill)
         {
+           
+            name += in_skill ? "_skill" : "";
             name += moving ? "_move" : "";
-
+            
+            
             if (!Global.content_exists(@"Graphics/Characters/" + name))
             {
                 name = Scene_Map.DEFAULT_MAP_SPRITE + (moving ? "_move" : "");
@@ -224,13 +227,28 @@ namespace Tactile
             }
             return name;
         }
+        /*public static string map_sprite_name(
+           string name,
+           bool in_skill)
+        {
+            name += in_skill ? "_skill" : "";
+
+            if (!Global.content_exists(@"Graphics/Characters/" + name))
+            {
+                name = Scene_Map.DEFAULT_MAP_SPRITE + (in_skill ? "_skill" : "");
+                //name = Scene_Map.DEFAULT_MAP_SPRITE + (name.Substring(name.Length - 5, 5) == "_move" ? "_move" : ""); //Debug
+            }
+            return name;
+        }*/
+
         public static string map_sprite_name(
             int classId,
             int gender,
-            bool moving)
+            bool moving,
+            bool in_skill)
         {
             string name = class_map_sprite_name(Global.data_classes[classId].Name, gender);
-            return map_sprite_name(name, moving);
+            return map_sprite_name(name, moving, in_skill);
         }
 
 #if DEBUG

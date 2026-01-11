@@ -104,7 +104,7 @@ namespace Tactile.Graphics.Map
             if (Animation.data[frame].Change_Image)
             {
                 if (unit != null)
-                    unit.refresh_sprite(unit.actual_map_sprite_name + Animation.data[frame].Image_Name, Animation.data[frame].Moving);
+                    unit.refresh_sprite(unit.actual_map_sprite_name + Animation.data[frame].Image_Name, Animation.data[frame].Moving, Animation.data[frame].Skilling);
 #if DEBUG
                 else
                     throw new NotImplementedException("Map object animation isn't set up for not-units yet");

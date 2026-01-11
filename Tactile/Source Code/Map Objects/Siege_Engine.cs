@@ -139,7 +139,7 @@ namespace Tactile
             {
                 string name = map_sprite_name;
                 ((Scene_Map)Global.scene).refresh_map_sprite(
-                    Id, (State != Siege_Engine_State.Fired || Item.out_of_uses) ? 1 : 0, name, false);
+                    Id, (State != Siege_Engine_State.Fired || Item.out_of_uses) ? 1 : 0, name, false, false);
             }
         }
 

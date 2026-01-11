@@ -31,6 +31,9 @@ namespace Tactile
             Astra_Missed = battler.Unit.actor.astra_missed;
             Astra_Count = battler.Unit.actor.astra_count;
             Swoop_Activated = battler.Unit.swoop_activated;
+            Aim_Activated = battler.Unit.aim_activated;
+            Has_Guard_Up = battler.Unit.in_skill_test();
+            Guard_Break = battler.Unit.Guard_Break;
         }
     }
 }

@@ -24,7 +24,7 @@ namespace Tactile
         Battle_Animation Spell_Effect, Anima_Effect, Skill_Effect;
         Battle_Animation Spell_Effect_2, Spell_Effect_3, Spell_Effect_4;
         List<Battle_Animation> Temp_Anims = new List<Battle_Animation>();
-        bool Idle = false, Avoiding = false;
+        bool Idle = false, Avoiding = false, Getting_hit = false;
         int Shake = 0;
         Vector2 Size = new Vector2(Config.BATTLER_SIZE, Config.BATTLER_SIZE);
         int NoDamageIndex = -1;
@@ -331,6 +331,7 @@ namespace Tactile
             }
             else
             {
+
                 set_animation(anim, true);
 #if DEBUG
                 if (Anim_Bitmap == null && Animation == null)
@@ -379,7 +380,25 @@ namespace Tactile
         public void get_hit(int dmg, bool crit)
         {
             Idle = false;
-
+            Getting_hit = true;
+            List<int> anim = BattlerImageWrapper.get_hit_animation_value(Battler, crit, 1); // Distance? //Yeti
+            if (anim.Count == 0)
+            {
+                idle_anim();
+            }
+            else
+            {
+                set_animation(anim, true);
+#if DEBUG
+                if (Anim_Bitmap == null && Animation == null)
+                    throw new ArgumentNullException("Did not load the bitmap for this animation properly");
+#endif
+            }
+        }
+        public void get_hit_return(int dmg, bool crit)
+        {
+            Idle = false;
+            
             List<int> anim = BattlerImageWrapper.get_hit_animation_value(Battler, crit, 1); // Distance? //Yeti
             if (anim.Count == 0)
             {

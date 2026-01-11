@@ -79,6 +79,10 @@ namespace Tactile
             TactileLibrary.Data_Terrain terrain = terrain_data(loc);
             return terrain.Heal != null && terrain.Heal[0] > 0;
         }
+        public bool terrain_heals_test()
+        {
+            return this.terrain_heals(Global.player.loc);
+        }
 
         public int terrain_healing_amount(Vector2 loc)
         {
@@ -88,6 +92,18 @@ namespace Tactile
             return terrain.Heal[0];
         }
 
+        public bool terrain_indoors(Vector2 loc)
+        {
+            TactileLibrary.Data_Terrain terrain = terrain_data(loc);
+            Indoors = false;
+            if (terrain.Name == "Floor" ||
+                terrain.Name == "Pillar" ||
+                terrain.Name == "Chest" ||
+                terrain.Name == "Stairs" ||
+                terrain.Name == "Throne")
+                return Indoors = true;
+            return Indoors;
+        }
         public HashSet<Vector2> healing_terrain()
         {
             HashSet<Vector2> result = new HashSet<Vector2>();
@@ -101,5 +117,6 @@ namespace Tactile
                 }
             return result;
         }
+        
     }
 }

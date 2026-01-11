@@ -70,6 +70,9 @@ namespace Tactile
                     case 13:
                     case 14:
                     case 15:
+                        if (Filename == "Anim1" || Filename == "Anim2")
+                            Black_Screen_Opacity = (Timer * 0);
+                        else
                         Black_Screen_Opacity = (Timer * 16);
                         break;
                     case 16:

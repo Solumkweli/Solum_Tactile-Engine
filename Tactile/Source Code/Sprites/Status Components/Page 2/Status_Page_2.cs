@@ -22,16 +22,17 @@ namespace Tactile
 
         private List<StatusUINode> TemporaryWLvls = new List<StatusUINode>();
 
-        public Status_Page_2()
+        public Status_Page_2(int color_override)
         {
             var nodes = new List<StatusUINode>();
 
             // Skills Window
             Skills_Window = new System_Color_Window();
-            Skills_Window.loc = new Vector2(8, 96);
+            Skills_Window.loc = new Vector2(8, 80);
             Skills_Window.width = 144;
             Skills_Window.height = 96;
             Skills_Window.stereoscopic = Config.STATUS_LEFT_WINDOW_DEPTH;
+            Skills_Window.color_override = color_override;
 
             // WLvls Window
             int max_wlvl_index = 0;
@@ -46,13 +47,14 @@ namespace Tactile
             int wlvl_rows = (max_wlvl_index / WLVL_COLUMNS) + 1;
 
             WLvls_Window = new System_Color_Window();
-            WLvls_Window.loc = new Vector2(168, 96);
+            WLvls_Window.loc = new Vector2(168, 80);
             WLvls_Window.width = 144;
             WLvls_Window.height = (wlvl_rows + 1) * 16; // 96; //Debug
             WLvls_Window.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
+            WLvls_Window.color_override = color_override;
 
             // Skill Bg
-            Skill_Bg = new Status_Support_Background();
+            Skill_Bg = new Status_Support_Background(color_override);
             Skill_Bg.loc = Skills_Window.loc + new Vector2(8, 8 + ACTOR_SKILLS * 16);
             Skill_Bg.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
             
@@ -147,7 +149,7 @@ namespace Tactile
                 if (!weapon_type.DisplayedInStatus)
                     continue;
 
-                nodes.Add(weapon_type_icon(weapon_type, weapon_type.StatusIndex));
+                nodes.Add(weapon_type_icon(weapon_type, weapon_type.StatusIndex, color_override));
             }
 
             StatusPageNodes = new UINodeSet<StatusUINode>(nodes);
@@ -155,7 +157,7 @@ namespace Tactile
             init_design();
         }
 
-        private StatusUINode weapon_type_icon(WeaponType weapon_type, int statusIndex)
+        private StatusUINode weapon_type_icon(WeaponType weapon_type, int statusIndex, int color_override = -1)
         {
             Vector2 loc = WLvls_Window.loc + new Vector2(
                 (statusIndex % WLVL_COLUMNS) * 64 + 8,
@@ -173,7 +175,7 @@ namespace Tactile
                         IsCapped = unit.actor.weapon_level_letter(weapon_type) ==
                             Data_Weapon.WLVL_LETTERS[Data_Weapon.WLVL_LETTERS.Length - 1]
                     };
-                });
+                }, color_override);
             node.loc = loc;
             node.stereoscopic = Config.STATUS_RIGHT_WINDOW_DEPTH;
 #if DEBUG

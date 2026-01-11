@@ -466,21 +466,61 @@ namespace Tactile.Menus.Map.Unit
 
             for (int i = 0; i < commands.Count; i++)
             {
-                // Trade, Give/Take
-                if (IndexRedirect[i] == 4 || IndexRedirect[i] == 6)
+                // Trade
+                if (IndexRedirect[i] == 4)
                     window.set_text_color(i, "Green");
                 // Supply
                 if (IndexRedirect[i] == 18)
                     window.set_text_color(i, "Green");
+                // Staff, Drop/Rescue, Dance, Support
+                if (IndexRedirect[i] == 1)
+                    window.set_text_color(i, "Blue");
+                if (IndexRedirect[i] == 2)
+                    window.set_text_color(i, "Blue");
+                if (IndexRedirect[i] == 6)
+                    window.set_text_color(i, "Blue");
+                if (IndexRedirect[i] == 16)
+                    window.set_text_color(i, "Blue");
+                if (IndexRedirect[i] == 17)
+                    window.set_text_color(i, "Blue");
+                // Attack, Steal
+                // Seize, Escape
+                if (IndexRedirect[i] == 14)
+                    window.set_text_color(i, "Yellow");
+                if (IndexRedirect[i] == 19)
+                    window.set_text_color(i, "Yellow");
                 // Talk
                 if (IndexRedirect[i] == 8 && Constants.Gameplay.TALKING_IS_FREE_ACTION)
-                    window.set_text_color(i, "Green");
+                    window.set_text_color(i, "Yellow");
 
                 // Disabled commands
                 if (Disabled.Contains(IndexRedirect[i]))
                     window.set_text_color(i, "Grey");
             }
-
+            // Actions:
+            //   0 = Attack
+            //   1 = Staff
+            //   2 = Drop/Rescue
+            //   3 = Item
+            //   4 = Trade
+            //   5 = Wait
+            //   6 = Give/Take
+            //   7 = Visit
+            //   8 = Talk
+            //   9 = Shop/Armory
+            //  10 = Arena
+            //  11 = Chest
+            //  12 = Door
+            //  13 = Steal
+            //  14 = Seize
+            //  15 = Status
+            //  16 = Dance
+            //  17 = Support
+            //  18 = Supply
+            //  19 = Escape
+            //  20 = Construct
+            //  29 = Secret Shop/Armory
+            //  30 = Arena
             // Automatically selects a specific menu option
             if (Global.game_temp.SelectedMoveMenuChoice.IsSomething)
             {

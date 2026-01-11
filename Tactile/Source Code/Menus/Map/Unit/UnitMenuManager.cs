@@ -500,6 +500,11 @@ namespace Tactile.Menus.Map.Unit
             {
                 Global.game_temp.temp_skill_ranges["SWOOP"] = unit.swoop_range();
             }
+            // Skills: Aim
+            if (unit.aim_activated)
+            {
+                Global.game_temp.temp_skill_ranges["AIM"] = unit.swoop_range();
+            }
             // Skills: Trample
             else if (unit.trample_activated)
             {

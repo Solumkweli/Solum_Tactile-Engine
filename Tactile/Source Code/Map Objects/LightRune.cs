@@ -135,7 +135,7 @@ namespace Tactile
             {
                 string name = map_sprite_name;
                 ((Scene_Map)Global.scene).refresh_map_sprite(
-                    Id, Team, name, false);
+                    Id, Team, name, false, false);
             }
         }
 

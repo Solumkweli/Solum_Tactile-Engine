@@ -182,6 +182,13 @@ namespace Tactile
                 battler1 = battler2;
             }
 
+            // Skills: Aim
+            if (battler2 != null && battler1.aim_activated)
+            {
+                // Use the opponent's platform for aiming attackers
+                battler1 = battler2;
+            }
+
             Game_Unit right_battler = battler1, left_battler = battler1;
             if (battler2 != null)
             {

@@ -46,6 +46,8 @@ namespace Tactile
         private int Tone_Timer;
         internal int Tone_Time_Max { get; private set; } //private //Yeti
         public Vector2? prev_player_loc = null;
+
+        public Dictionary<int, string> turn_theme_override = new Dictionary<int, string>();
 #if !MONOGAME && DEBUG
         internal bool Moving_Editor_Unit = false; //private //Yeti
 #endif
@@ -80,6 +82,8 @@ namespace Tactile
             Unit_Battle_Themes.write(writer);
             Home_Base_Events.write(writer);
             Metrics.write(writer);
+
+            turn_theme_override.write(writer);
         }
 
         public void read_map_stuff(BinaryReader reader)
@@ -116,6 +120,9 @@ namespace Tactile
             Unit_Battle_Themes.read(reader);
             Home_Base_Events.read(reader);
             Metrics = Gameplay_Metrics.read(reader);
+
+            turn_theme_override.read(reader);
+
             if (Global.LOADED_VERSION.older_than(0, 5, 5, 0))
             {
                 bool ch6_line = reader.ReadBoolean(); //Yeti
@@ -211,6 +218,7 @@ namespace Tactile
             Death_Quotes.Clear();
             Casual_Death_Quote_Blocked.Clear();
             Unit_Battle_Themes.Clear();
+            turn_theme_override.Clear();
 
             if (reset_events)
             {
@@ -1441,7 +1449,10 @@ namespace Tactile
 
             if (teamTurn == -1)
                 teamTurn = Team_Turn;
-            Turn_Theme = this.chapter.Turn_Themes[teamTurn];
+            if (turn_theme_override.ContainsKey(teamTurn))
+                Turn_Theme = turn_theme_override[teamTurn];
+            else
+                Turn_Theme = this.chapter.Turn_Themes[teamTurn];
             if (teamTurn == Constants.Team.PLAYER_TEAM && near_victory())
                 Turn_Theme = Global.BgmConfig.VictoryTheme;
             Near_Victory = near_victory();
@@ -1479,6 +1490,9 @@ namespace Tactile
 #endif
             //Yeti
             if (Scene_Map.intro_chapter_options_blocked())
+                return false;
+            // Skitty
+            if (Scene_Map.ignore_victory_check())
                 return false;
             return enemies <= 1; //Debug
         }
@@ -1538,7 +1552,11 @@ namespace Tactile
 
         public void play_preparations_theme()
         {
-            Global.Audio.PlayMapTheme(Global.BgmConfig.PreparationsTheme);
+            if (Turn_Theme == "")
+                Global.Audio.PlayMapTheme(Global.BgmConfig.PreparationsTheme);
+            else //@Skitty
+                Global.Audio.PlayMapTheme(Turn_Theme);
+            //Global.Audio.PlayBgm(Global.BgmConfig.PreparationsTheme, forceRestart: true); //@Debug
             //Global.Audio.PlayBgm(Global.BgmConfig.PreparationsTheme, forceRestart: true); //@Debug
         }
         #endregion

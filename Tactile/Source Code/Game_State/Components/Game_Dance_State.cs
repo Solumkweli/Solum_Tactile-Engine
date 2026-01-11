@@ -144,6 +144,7 @@ namespace Tactile.State
                                     {
                                         Dance_Animated = true;
                                         scene_map.set_map_animation(Dancer_Id, 1, dancer.actor.class_id);
+
                                     }
                                     Dance_Phase++;
                                     Dance_Action = 0;

@@ -1118,6 +1118,14 @@ namespace Tactile
                 else
                     unit.drops_item = process_bool(command.Value[1]);
             }
+            // Value [2] (optional) item type
+            // Value [3] (optional) item id
+            if (command.Value.Length > 2)
+            {
+                int item_type = process_number(command.Value[2]);
+                int item_id = process_number(command.Value[3]);
+                unit.set_dropped_item((Item_Data_Type)item_type, item_id);
+            }
             Index++;
             return true;
         }
@@ -1260,6 +1268,7 @@ namespace Tactile
                     // Value[0] = "Unit"
                     // Value[1] = unit id
                     // Value[2] = time (optional)
+                    // Value[3] = color (optional, red by default, true or false) true = white, false = red
                     int id = process_unit_id(command.Value[1]);
                     if (!Global.game_map.units.ContainsKey(id))
                     {
@@ -1269,18 +1278,23 @@ namespace Tactile
                     Game_Unit unit = Global.game_map.units[id];
                     if (command.Value.Length < 3)
                         Global.player.target_tile(unit.loc);
-                    else
+                    else if (command.Value.Length == 3)
                         Global.player.target_tile(unit.loc, process_number(command.Value[2]));
+                    else
+                        Global.player.target_tile(unit.loc, process_number(command.Value[2]), process_bool(command.Value[3]));
                     Index++;
                     break;
                 default:
                     // Value[0] = x
                     // Value[1] = y
                     // Value[2] = time (optional)
+                    // Value[3] = color (optional, red by default, true or false) true = white, false = red
                     if (command.Value.Length < 3)
                         Global.player.target_tile(new Vector2(process_number(command.Value[0]), process_number(command.Value[1])));
-                    else
+                    else if (command.Value.Length == 3)
                         Global.player.target_tile(new Vector2(process_number(command.Value[0]), process_number(command.Value[1])), process_number(command.Value[2]));
+                    else
+                        Global.player.target_tile(new Vector2(process_number(command.Value[0]), process_number(command.Value[1])), process_number(command.Value[2]), process_bool(command.Value[3]));
                     Index++;
                     break;
             }
@@ -2783,6 +2797,63 @@ namespace Tactile
                     }
                     break;
                 #endregion
+                case "AI Ignore":
+                    #region Have the AI not acknowledge a specific unit
+                    // Value[1] = id
+                    // Value[2] = ignored unit id
+                    int ignorer_id = process_unit_id(command.Value[1]);
+                    int ignored_id = process_unit_id(command.Value[2]);
+
+                    Game_Unit ignorer_unit = null;
+                    if (ignorer_id == -1)
+                        if (Global.game_map.last_added_unit != null)
+                            ignorer_unit = Global.game_map.last_added_unit;
+                    if (Global.game_map.units.ContainsKey(ignorer_id))
+                        ignorer_unit = Global.game_map.units[ignorer_id];
+                    if (ignorer_unit != null)
+                        ignorer_unit.new_ai_ignore = ignored_id;
+
+                    break;
+                #endregion
+                case "Set Scrolling Background":
+                    #region Scrolling Background; floating islands my beloved
+                    // Value[1] Filename
+                    // Value[2] Scroll Velocity X
+                    // Value[3] Scroll Velocity Y
+                    // Value[4] Parallax Factor
+                    Global.game_map.add_background(
+                        command.Value[1],
+                        process_number(command.Value[2]),
+                        process_number(command.Value[3]),
+                        process_number(command.Value[4]),
+                        Background_Mode.Scrolling);
+                    break;
+                case "Set Static Background":
+                    #region Static Background
+                    // Value[1] Filename
+                    // Value[2] Position Offset X
+                    // Value[3] Position Offset Y
+                    // Value[4] Parallax Factor
+                    Global.game_map.add_background(
+                        command.Value[1],
+                        process_number(command.Value[2]),
+                        process_number(command.Value[3]),
+                        process_number(command.Value[4]),
+                        Background_Mode.Static);
+                    break;
+                #endregion
+                case "Clear Background":
+                    Global.game_map.clear_background();
+                    break;
+                case "Change Turn Theme":
+
+                    #region Change Turn Theme
+                    // Value[1] = Phase (i.e. player, enemy, ally, intruder)
+                    // Value[2] = Song Name
+                    Global.game_state.turn_theme_override[process_number(command.Value[1])] = command.Value[2];
+                    break;
+                #endregion
+                #endregion
 #if DEBUG
                 default:
                     throw event_case_missing_exception(command.Value[0], command.Key);
@@ -3201,13 +3272,14 @@ namespace Tactile
         {
             // Value[0] = BGM name
             //?Value[1] = Force restarting theme? (default false)
-            // Value[2] = If turn theme, which phase? (optional)
+            // Value[2] = Play as turn theme?
+            // Value[3] = If turn theme, which phase? (optional)
             bool restart_theme = command.Value.Length > 1 && process_bool(command.Value[1]);
             if (command.Value[0] == "Turn Theme")
             {
-                if (command.Value.Length > 2)
+                if (command.Value.Length > 3)
                 {
-                    int phase = process_number(command.Value[2]);
+                    int phase = process_number(command.Value[3]);
                     Global.game_state.play_turn_theme(teamTurn: phase);
                 }
                 else
@@ -3219,7 +3291,11 @@ namespace Tactile
                 // after scripted battles
                 Global.game_state.play_turn_theme(command.Value[0], restart_theme);
             }
-            else
+            else if (command.Value.Length > 2 && process_bool(command.Value[2]))
+            {
+                Global.game_state.play_turn_theme(command.Value[0], restart_theme);
+            }
+            else 
                 Global.Audio.PlayBgm(command.Value[0], forceRestart: restart_theme);
             Index++;
             return true;
@@ -4039,6 +4115,19 @@ namespace Tactile
                         result = attackable
                             .Any(x => Global.game_map.units[x].attack_range.Contains(
                                 unit.loc));
+                    }
+                    break;
+                case "Can Talk":
+                    // Value[1] = unit1 id
+                    id = process_unit_id(command.Value[1]);
+                    if (Global.game_map.units.ContainsKey(id))
+                    {
+                        unit = Global.game_map.units[id];
+                        int[] talk = Game_AI.search_for_talk(unit);
+                        if (talk != null && talk[0] >= 0)
+                            result = true;
+                        else
+                            result = false;
                     }
                     break;
                 case "Enemy in Range":

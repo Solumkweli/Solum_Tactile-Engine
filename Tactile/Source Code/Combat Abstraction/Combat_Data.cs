@@ -15,7 +15,7 @@ namespace Tactile
         public string Name1, Name2;
         public int Kill;
         public List<KeyValuePair<Combat_Round_Data, List<Combat_Action_Data>>> Data =
-            new List<KeyValuePair<Combat_Round_Data,List<Combat_Action_Data>>>();
+            new List<KeyValuePair<Combat_Round_Data, List<Combat_Action_Data>>>();
         public int Distance;
         protected List<int> Add_Attack = new List<int>();
         protected List<int> Skip_Attack = new List<int>();
@@ -235,7 +235,7 @@ namespace Tactile
                 Global.game_map.units[targetId].counters_first(Global.game_map.units[Battler_1_Id]);
 
             int num_attacks1, num_attacks2;
-            for(int i = 0; i < combat_attacks(
+            for (int i = 0; i < combat_attacks(
                 battler_1, battler_2, out num_attacks1, out num_attacks2); i++)
             {
                 if (ambush)
@@ -514,7 +514,7 @@ namespace Tactile
                 // Don't return if either battler wants the attacks to continue
                 if (!attacker.continue_attacking() &&
                     !(target.is_unit() && (target as Game_Unit).continue_attacking()))
-                return false;
+                    return false;
             Game_Unit target_unit = null;
             if (target.is_unit())
             {
@@ -586,13 +586,13 @@ namespace Tactile
             if (Applied)
                 return;
             Applied = true;
-            
+
             Game_Unit battler_1 = Global.game_map.units[Battler_1_Id];
             Game_Unit battler_2 = Battler_2_Id == null ? null : Global.game_map.units[(int)Battler_2_Id];
             int battler_1_hp = battler_1.hp;
             int battler_2_hp = battler_2 != null ? battler_2.hp : -1;
 
-            for(int i = 0; i < Data.Count; i++)
+            for (int i = 0; i < Data.Count; i++)
             {
                 Combat_Round_Data data = Data[i].Key;
                 data.cause_damage();
@@ -606,7 +606,8 @@ namespace Tactile
                 Battler_1_Id, Battler_2_Id, battler_1_hp, battler_2_hp, Weapon_1_Id, Weapon_2_Id,
                 Data.Where(x => x.Key.Attacker == 1).Count(), Data.Where(x => x.Key.Attacker != 1).Count());
 
-            // Charge Masteries
+            //
+            // Masteries
             if (Attacked_1 && battler_2 != null && battler_2.different_team(battler_1))
                 battler_1.charge_masteries(Game_Unit.MASTERY_RATE_BATTLE_END);
             if (Attacked_2 && battler_2 != null && battler_2.different_team(battler_1))

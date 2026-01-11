@@ -9,7 +9,7 @@ namespace Tactile
 {
     class Game_Options
     {
-        const int DATA_COUNT = 16;
+        const int DATA_COUNT = 17;
         public byte[] Data = new byte[DATA_COUNT];
 
         #region Serialization
@@ -69,6 +69,7 @@ namespace Tactile
         public byte subtitle_help { get { return Data[(int)Constants.Options.Subtitle_Help]; } set { Data[(int)Constants.Options.Subtitle_Help] = value; } }
         public byte autocursor { get { return Data[(int)Constants.Options.Autocursor]; } set { Data[(int)Constants.Options.Autocursor] = value; } }
         public byte auto_turn_end { get { return Data[(int)Constants.Options.Auto_Turn_End]; } set { Data[(int)Constants.Options.Auto_Turn_End] = value; } }
+        public byte status_color { get { return Data[(int)Constants.Options.Status_Color]; } set { Data[(int)Constants.Options.Status_Color] = value; } }
         public byte window_color { get { return Data[(int)Constants.Options.Window_Color]; } set { Data[(int)Constants.Options.Window_Color] = value; } }
         #endregion
 
@@ -88,7 +89,7 @@ namespace Tactile
             enemy_window = 1;
             terrain_window = 0;
             objective_window = 0;
-            grid = 8;
+            grid = 0;
             range_preview = 0;
             hp_gauges = (int)Constants.Hp_Gauge_Modes.Injured;
             controller = 0;
@@ -97,6 +98,7 @@ namespace Tactile
             auto_turn_end = 2;
             //music_on = 0; //Yeti
             //sound_on = 0;
+            status_color = 0;
             window_color = 0;
         }
     }

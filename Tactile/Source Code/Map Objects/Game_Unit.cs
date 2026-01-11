@@ -23,15 +23,18 @@ namespace Tactile
         static bool WAITING_FOR_SCROLL_BEFORE_MOVING = false;
 
         protected Vector2 Move_Loc = Vector2.Zero, Turn_Start_Loc = Vector2.Zero, Prev_Loc = Vector2.Zero, Rescue_Drop_Loc = Vector2.Zero;
-        protected int Moved_So_Far = 0, Temp_Moved = 0;
+        public int Moved_So_Far = 0, Temp_Moved = 0;
+        protected bool Persistant_Skill_Stat_Triggered = false;
+        protected int Persistent_Skill_Stat_Bonus = 0;
+        protected int Persistent_Skill_Stat_Change = 0;
         protected int Team, Group;
         protected int ActorId;
         protected bool Highlighted = false;
         protected int ForceHighlightTimer = 0;
-        protected int Moving_Anim = -1, Highlighted_Anim = -1;
+        protected int Moving_Anim = -1, Highlighted_Anim = -1, In_Skill_Anim = -1;
         protected int Move_Timer = 0;
         protected bool Ready = true;
-        protected bool Sprite_Moving = false, Battling = false;
+        protected bool Sprite_Moving = false, Battling = false, Sprite_In_Skill = false;
         protected bool Cantoing = false;
         protected int Rescued = 0, Rescuing = 0;
         protected bool Magic_Attack = false;
@@ -39,8 +42,9 @@ namespace Tactile
             Staff_Range = new HashSet<Vector2>(), Talk_Range = new HashSet<Vector2>();
         protected List<Vector2> Move_Route = new List<Vector2>();
         protected int Mission = 0, Ai_Mission = 2;
+        protected List<int> Ai_Ignore = new List<int> { -1 };
         protected bool Dead = false;
-        protected bool Boss = false, Drops_Item = false;
+        protected bool Boss = false;
         protected int Priority = 0;
         protected bool Gladiator = false;
         protected int Vision_Bonus = 0;
@@ -89,10 +93,12 @@ namespace Tactile
             writer.Write(ForceHighlightTimer);
             writer.Write(Moving_Anim);
             writer.Write(Highlighted_Anim);
+            writer.Write(In_Skill_Anim);
             writer.Write(Move_Timer);
             writer.Write(Ready);
             writer.Write(Sprite_Moving);
             writer.Write(Battling);
+            writer.Write(Sprite_In_Skill);
             writer.Write(Cantoing);
             writer.Write(Rescued);
             writer.Write(Rescuing);
@@ -104,9 +110,9 @@ namespace Tactile
             Move_Route.write(writer);
             writer.Write(Mission);
             writer.Write(Ai_Mission);
+            Ai_Ignore.write(writer);
             writer.Write(Dead);
             writer.Write(Boss);
-            writer.Write(Drops_Item);
             writer.Write(Priority);
             writer.Write(Gladiator);
             writer.Write(Vision_Bonus);
@@ -142,10 +148,12 @@ namespace Tactile
                 ForceHighlightTimer = reader.ReadInt32(); 
             Moving_Anim = reader.ReadInt32();
             Highlighted_Anim = reader.ReadInt32();
+            In_Skill_Anim = reader.ReadInt32();
             Move_Timer = reader.ReadInt32();
             Ready = reader.ReadBoolean();
             Sprite_Moving = reader.ReadBoolean();
             Battling = reader.ReadBoolean();
+            Sprite_In_Skill = reader.ReadBoolean();
             Cantoing = reader.ReadBoolean();
             Rescued = reader.ReadInt32();
             Rescuing = reader.ReadInt32();
@@ -157,9 +165,9 @@ namespace Tactile
             Move_Route.read(reader);
             Mission = reader.ReadInt32();
             Ai_Mission = reader.ReadInt32();
+            Ai_Ignore.read(reader);
             Dead = reader.ReadBoolean();
             Boss = reader.ReadBoolean();
-            Drops_Item = reader.ReadBoolean();
             Priority = reader.ReadInt32();
             Gladiator = reader.ReadBoolean();
             Vision_Bonus = reader.ReadInt32();
@@ -232,6 +240,14 @@ namespace Tactile
                 update_map_animation(true);
                 if (Global.scene.is_strict_map_scene)
                     refresh_sprite();
+            }
+        }
+        public bool sprite_in_skill
+        {
+            get { return Sprite_In_Skill; }
+            set
+            {
+                Sprite_In_Skill = value;
             }
         }
 
@@ -361,6 +377,17 @@ namespace Tactile
             get { return Ai_Mission; }
             set { Ai_Mission = value; }
         }
+        public bool ai_ignores(int id)
+        {
+            return Ai_Ignore.Contains(id);
+        }
+        public int new_ai_ignore
+        {
+            set
+            {
+                Ai_Ignore.Add(value);
+            }
+        }
         public int ai_mission
         {
             get { return Ai_Mission % Game_AI.MISSION_COUNT; }
@@ -380,11 +407,28 @@ namespace Tactile
 
         public bool drops_item
         {
-            get { return Drops_Item && actor.has_items; }
-            set { Drops_Item = value; }
+            get { return actor.drops_item && actor.has_items; }
+            set { actor.drops_item = value; }
         }
 
-        public int priority
+        public void set_dropped_item(Item_Data_Type type, int id)
+        {
+            foreach (Item_Data item in actor.items)
+                if (item.Type == type && item.Id == id)
+                {
+                    item.Drops = true;
+                    break;
+                }
+            // What should happen if no appropriate item is found?
+            // Perhaps change drops_item back to false?
+        }
+        public void clear_dropped_item()
+        {
+            foreach (Item_Data item in actor.items)
+                item.Drops = false;
+        }
+
+public int priority
         {
             get { return Priority; }
             set { Priority = value; }
@@ -465,9 +509,12 @@ namespace Tactile
         protected void initialize(int id, Vector2 loc, int team)
         {
             //actor.setup_items(false); //Debug
+
+            actor.drops_item = false; // I think this is necessary to prevent the game from "remembering" item drops from previous chapters //gooseish
             Id = id;
             Turn_Start_Loc = Prev_Loc = Move_Loc = Loc = loc;
             refresh_real_loc();
+            initialize_statuses();
             Team = (int)MathHelper.Clamp(team, 1, Constants.Team.NUM_TEAMS);
         }
         protected void initialize(int id, Vector2 loc, int team, int priority)
@@ -476,6 +523,7 @@ namespace Tactile
             Id = id;
             Turn_Start_Loc = Prev_Loc = Move_Loc = Loc = loc;
             refresh_real_loc();
+            initialize_statuses();
 
             Priority = priority;
             change_team((int)MathHelper.Clamp(team, 1, Constants.Team.NUM_TEAMS));
@@ -493,7 +541,7 @@ namespace Tactile
             Team = team;
             // Clear item drop flag if switching to an allied team
             if (!is_attackable_team(Constants.Team.PLAYER_TEAM))
-                Drops_Item = false;
+                drops_item = false;
 
             if (!Global.scene.is_test_battle)
             {
@@ -533,7 +581,6 @@ namespace Tactile
         {
             refresh_hp_skill(damageTaken);
         }
-
         public List<Item_Data> items
         {
             get
@@ -592,14 +639,23 @@ namespace Tactile
                             return 100;
 #endif
                 int mov = this.mov;
+                int remaining = mov - Moved_So_Far;
                 // Skills: Dash
                 if (DashActivated)
                     return mov;
-
                 if (Cantoing)
-                    mov -= Moved_So_Far;
+                {
+                    if (is_rescuing)
+                        return Math.Min(4, remaining);
+                    else if (actor.has_skill("STRAFING"))
+                        return Math.Min(4, remaining);
+                    else if (actor.has_skill("FLASHSTEP"))
+                        return Math.Min(2, remaining);
+                    return Math.Min(2, remaining);
+                }
                 return mov;
             }
+
         }
 
         internal bool immobile
@@ -767,6 +823,10 @@ namespace Tactile
             if (target != null && Swoop_Activated)
                 terrainDef = target.terrain_def_bonus();
 
+            // Skills: Aim
+            if (target != null && Aim_Activated)
+                terrainDef = target.terrain_def_bonus();
+
             Maybe<int> result = default(Maybe<int>);
             // Skills: Parity
             if (target != null)
@@ -800,6 +860,10 @@ namespace Tactile
             if (target != null && Swoop_Activated)
                 terrainRes = target.terrain_res_bonus();
 
+            // Skills: Aim
+            if (target != null && Aim_Activated)
+                terrainRes = target.terrain_res_bonus();
+
             Maybe<int> result = default(Maybe<int>);
             // Skills: Parity
             if (target != null)
@@ -827,11 +891,19 @@ namespace Tactile
         {
             return Global.game_map.terrain_avo_bonus(Loc);
         }
+        public bool terrain_is_indoors(Vector2 loc)
+        {
+            return Global.game_map.terrain_indoors(Loc);
+        }
         internal Maybe<int> terrain_avo_bonus(Game_Unit target, bool magicAttack)
         {
             int terrainAvo = terrain_avo_bonus();
             // Skills: Swoop
             if (target != null && Swoop_Activated)
+                terrainAvo = target.terrain_avo_bonus();
+
+            // Skills: Aim
+            if (target != null && Aim_Activated)
                 terrainAvo = target.terrain_avo_bonus();
 
             Maybe<int> result = default(Maybe<int>);
@@ -858,6 +930,10 @@ namespace Tactile
         }
 
         internal bool terrain_heals()
+        {
+            return Global.game_map.terrain_heals(Loc);
+        }
+        internal bool terrain_indoors()
         {
             return Global.game_map.terrain_heals(Loc);
         }
@@ -943,8 +1019,6 @@ namespace Tactile
         {
             switch (stat)
             {
-                case Stat_Labels.Hp:
-                    return 0; //Debug
                 case Stat_Labels.Pow:
                     return pow_bonus_skill + temporary_stat_buff(Buffs.Pow);
                 case Stat_Labels.Skl:
@@ -1195,7 +1269,7 @@ namespace Tactile
                 if (this.berserk)
                     return true;
 
-                if (Drops_Item || this.boss || !actor.is_generic_actor)
+                if (drops_item || this.boss || !actor.is_generic_actor)
                     return true;
                 return false;
             }
@@ -2108,7 +2182,13 @@ namespace Tactile
                 (Rescued != 0 ? Loc != Config.OFF_MAP : true));
         }
         #endregion
-
+        public bool in_skill_test()
+        {
+            // SKills: En Garde
+            if (actor.has_skill("GARDE") && actor.has_guard_up()) 
+                return Sprite_In_Skill = true;
+            return Sprite_In_Skill = false;
+        }
         public bool highlight_test()
         {
             // Unless all of the kinds of busy
@@ -2526,6 +2606,7 @@ namespace Tactile
         }
         protected bool is_skill_unit_sprite { get { return Battling && !(Trample_Activated && is_in_motion()); } }
         protected bool is_moving_unit_sprite { get { return Sprite_Moving; } }
+        protected bool is_in_skill_unit_sprite { get { return Sprite_In_Skill; } }
         protected bool is_highlighted_unit_sprite
         {
             get
@@ -2540,14 +2621,16 @@ namespace Tactile
 
         protected void update_idle_animation()
         {
-            Moving_Anim = -1;
-            Highlighted_Anim = -1;
-            Facing = 2;
-            update_frame();
+                Moving_Anim = -1;
+                Highlighted_Anim = -1;
+                In_Skill_Anim = -1;
+                Facing = 2;
+                update_frame();            
         }
         protected void update_highlighted_animation()
         {
             Moving_Anim = -1;
+            In_Skill_Anim = -1;
             Highlighted_Anim = (Highlighted_Anim + 1) % Global.game_system.Unit_Highlight_Anim_Time;
             Facing = 6;
 
@@ -2569,6 +2652,7 @@ namespace Tactile
         {
             Moving_Anim = (Moving_Anim + 1) % Global.game_system.Unit_Moving_Anim_Time;
             Highlighted_Anim = -1;
+            In_Skill_Anim = -1;
 
             int anim_count = Moving_Anim;
             int index = 0;
@@ -2584,7 +2668,29 @@ namespace Tactile
             }
             Frame = Config.CHARACTER_MOVING_ANIM_FRAMES[index];
         }
+        #region Sprite in skill mode 
+        protected void update_in_skill_idle_animation() // Not needed unless the sprite change occurs for other instances than Idle, Highlight, Moving, Or changes the size/timings/frame count &/or order
+        {
+            Moving_Anim = -1;
+            Highlighted_Anim = -1;
+            In_Skill_Anim = (In_Skill_Anim + 1) % Global.game_system.Unit_In_Skill_Anim_Time;
+            Facing = 2;
 
+            int anim_count = In_Skill_Anim;
+            int index = 0;
+            for (int i = 0; i < Config.CHARACTER_IN_SKILL_ANIM_TIMES.Length; i++)
+            {
+                if (anim_count < Config.CHARACTER_IN_SKILL_ANIM_TIMES[i])
+                {
+                    index = i;
+                    break;
+                }
+                else
+                    anim_count -= Config.CHARACTER_IN_SKILL_ANIM_TIMES[i];
+            }
+            Frame = Global.game_system.unit_anim_in_skil_idle_frame;
+        }
+        #endregion
         public void update_move_sound()
         {
             // Skills: Trample
@@ -4187,7 +4293,7 @@ namespace Tactile
         public void end_turn(bool charge_skills)
         {
             if (Constants.Gameplay.MASTERIES_CHARGE_AT_TURN_END)
-                if (charge_skills)
+                if ((charge_skills) && !actor.has_skill("BRUTE"))
                     charge_masteries(MASTERY_RATE_NEW_TURN);
             //@Yeti: This should be somewhere different? or refresh_unit()
             // shouldn't call this function
@@ -4204,6 +4310,17 @@ namespace Tactile
                             actor.same_target_support_gain(actor_id);
                     }
                 }
+            foreach (int unit_id in Global.game_map.teams[Team])
+            {
+                int actor_id = Global.game_map.units[unit_id].actor.id;
+                {
+                    HashSet<int> shared_targets = new HashSet<int>(
+                        Attack_Targets_This_Turn.Intersect(
+                        Global.game_map.units[unit_id].Attack_Targets_This_Turn));
+                    if (shared_targets.Count > 0)
+                        actor.same_target_support_gain(actor_id);
+                }
+            }
             if (!Ready)
             {
                 Ready = true;
@@ -4235,7 +4352,35 @@ namespace Tactile
             Temp_Moved = 0;
             Blocked = false;
         }
-
+        public void RefreshGuard()
+        {
+            if (actor.has_skill("GARDE") && !actor.has_guard_up())
+            {
+                /*foreach (int unit_id in Global.game_map.teams[Team]
+                    .Where(x => Global.game_map.units[x].ActorId != ActorId))
+                {
+                    
+                } */
+                // Maybe animate here calling one, instead of in Game_state_New_Turn?
+                //Global.Audio.play_se("Map Sounds", "En_Garde");
+                set_guard_up();
+                
+            }
+            in_skill_test();
+            refresh_sprite();
+        }
+        public void initialize_statuses() //Needed to apply statuses to team 2-3-4 on turn one player phase
+        {
+            if (actor.has_skill("GARDE") && !actor.has_guard_up())
+            {
+                actor.add_state(27);
+            }
+        }
+        public void set_guard_up()
+        {
+            En_Garde_Damage = 0;
+            actor.add_state(27);
+        }
         public void new_turn()
         {
             if (!Constants.Gameplay.MASTERIES_CHARGE_AT_TURN_END)
@@ -4247,7 +4392,12 @@ namespace Tactile
             for (int i = 0; i < Stat_Bonuses.Count; i++)
             {
                 if (Stat_Bonuses[i] < 0)
-                    Stat_Bonuses[i] = Math.Min(0, Stat_Bonuses[i] + 1);
+                {
+                    if (actor.has_skill("BRUTE"))
+                        Stat_Bonuses[i] = Math.Max(0, Stat_Bonuses[i] - 1);
+                    else
+                        Stat_Bonuses[i] = Math.Min(0, Stat_Bonuses[i] + 1);
+                }
                 else
                     Stat_Bonuses[i] = Math.Max(0, Stat_Bonuses[i] - 1);
             }
@@ -5052,7 +5202,7 @@ namespace Tactile
                             result.UnionWith(BattlerImageWrapper.return_animation_value(battlerData, crt == 0, distance, hit == 0, false));
                         }
             }
-
+            
             result.UnionWith(BattlerImageWrapper.idle_animation_value(battlerData, distance));
             result.UnionWith(BattlerImageWrapper.avoid_animation_value(battlerData, distance));
             result.UnionWith(BattlerImageWrapper.avoid_return_animation_value(battlerData, distance));
@@ -5211,7 +5361,7 @@ namespace Tactile
         public virtual void init_sprites()
         {
             ((Scene_Map)Global.scene).add_map_sprite(Id);
-            if (!(is_active_unit_sprite || is_skill_unit_sprite || is_moving_unit_sprite || is_highlighted_unit_sprite))
+            if (!(is_active_unit_sprite || is_moving_unit_sprite || is_highlighted_unit_sprite))
                 update_idle_animation();
             refresh_sprite();
         }
@@ -5245,14 +5395,15 @@ namespace Tactile
 
         public void refresh_sprite()
         {
+            in_skill_test();
             refresh_sprite(actual_map_sprite_name, Sprite_Moving ||
-                (Battling && !(Global.game_state.staff_active && Global.game_state.battler_1_id == Id)));
+                (Battling && !(Global.game_state.staff_active && Global.game_state.battler_1_id == Id)), sprite_in_skill);
         }
-        public void refresh_sprite(string name, bool moving)
+        public void refresh_sprite(string name, bool moving, bool in_skill)
         {
             if (Global.scene.is_map_scene)
             {
-                ((Scene_Map)Global.scene).refresh_map_sprite(Id, Ready ? Team : 0, name, moving);
+                ((Scene_Map)Global.scene).refresh_map_sprite(Id, Ready ? Team : 0, name, moving, in_skill);
             }
         }
 
@@ -5265,7 +5416,7 @@ namespace Tactile
             (sprite as Graphics.Map.Character_Sprite).update(this);
             sprite.mirrored =
                 ((Facing != 4 && Facing != 6) ||
-                    !(is_moving_unit_sprite || Battling)) &&
+                    !(is_moving_unit_sprite || Battling || is_in_skill_unit_sprite)) &&
                 has_flipped_map_sprite;
             sprite.draw_offset = new Vector2(TILE_SIZE / 2, TILE_SIZE);
         }

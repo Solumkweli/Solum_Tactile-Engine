@@ -403,12 +403,13 @@ namespace Tactile
             if (Target_Timer > -1)
             {
                 // Should the cursor be a different color during events/pre-chapter? //Debug
-                Facing = 4; //battle_map? 4 : 2 //Yeti
+                if (Facing == 6)
+                    Facing = 4; //battle_map? 4 : 2 //Yeti <-- change this to 2 for white frame, 4 for red frame
                 return false;
             }
             return true;
         }
-        
+
         public void target_tile(Vector2 target_loc)
         {
             target_tile(target_loc, 48);
@@ -419,7 +420,17 @@ namespace Tactile
             Loc = target_loc;
             refresh_real_loc();
         }
-
+        // add beneath the existing target_tile(Vector2 target_loc, int time), around line 424; you will have 3 target_tile functions
+        public void target_tile(Vector2 target_loc, int time, bool facing)
+        {
+            Target_Timer = time;
+            Loc = target_loc;
+            refresh_real_loc();
+            if (facing)
+                Facing = 2; // white
+            else
+                Facing = 4; // red
+        }
         public void cancel_target_tile()
         {
             if (Target_Timer > -1)

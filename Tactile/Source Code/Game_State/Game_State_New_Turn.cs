@@ -11,6 +11,7 @@ namespace Tactile
 
         bool New_Turn_Calling = false;
         bool In_New_Turn = false;
+        bool In_skill_switch_Animated = false;
         int New_Turn_Phase = 0;
         int New_Turn_Action = 0;
         int New_Turn_Timer = 0;
@@ -133,6 +134,9 @@ namespace Tactile
                         // Status Effects
                         case 4:
                             cont = update_new_turn_status();
+                            break;
+                        case 5:
+                            cont = update_new_turn_in_skill();
                             break;
                         // Cleanup
                         default:
@@ -595,7 +599,7 @@ namespace Tactile
                 return true;
             switch (New_Turn_Action)
             {
-                case 0:
+                case 0: // Does the camera pan to the unit or ignores it 
                     if (new_turn_unit == null)
                     {
                         New_Turn_Phase++;
@@ -838,6 +842,92 @@ namespace Tactile
                     break;
                 // Next phase
                 case 7:
+                    New_Turn_Phase++;
+                    New_Turn_Action = 0;
+                    New_Turn_Timer = 0;
+                    return false;
+            }
+            return true;
+        }
+        protected bool update_new_turn_in_skill()
+        {
+            Scene_Map scene_map = get_scene_map();
+            if (get_scene_map() == null)
+                return true;
+            switch (New_Turn_Action)
+            {
+                case 0: // Does the camera pan to the unit or ignores it 
+                    if (new_turn_unit == null)
+                    {
+                        New_Turn_Phase++;
+                        return false;
+                    }
+                    else
+                    {
+                        if (new_turn_unit.actor.has_skill("GARDE") && !new_turn_unit.actor.has_guard_up())
+                        {
+                            New_Turn_Action++;
+                            Global.player.force_loc(new_turn_unit.loc);
+                        }
+                        else
+                        {
+                            New_Turn_Phase++;
+                            return false;
+                        }
+                    }
+                    break;
+                case 1:
+                    switch (New_Turn_Timer)
+                    {
+                        case 4:
+                            if (!Global.game_map.scrolling)
+                            {
+                                New_Turn_Action++;
+                                New_Turn_Timer = 0;
+                                return false;
+                            }
+                            break;
+                        default:
+                            New_Turn_Timer++;
+                            break;
+                    }
+                    break;
+                // Applies status, stops map sprite / former : Makes HP window, stops map sprite
+                case 2:
+                    switch (New_Turn_Timer)
+                    {
+                        case 0:
+                            new_turn_unit.RefreshGuard();
+                            Global.Audio.play_se("Map Sounds", "En_Garde");
+                            /*if (Map_Animations.unit_data(2, new_turn_unit.actor.class_id) != null)
+                            {
+                                In_skill_switch_Animated = true;
+                                scene_map.set_map_animation(new_turn_unit_id, 2, new_turn_unit.actor.class_id);
+                            }
+                            //scene_map.set_map_animation(new_turn_unit.id, 1, new_turn_unit.actor.class_id);
+;                           if (In_skill_switch_Animated)
+                            {
+                                if (scene_map.map_animation_finished(new_turn_unit_id))
+                                {
+                                New_Turn_Phase++;
+                                New_Turn_Action = 0;
+                                New_Turn_Timer = 0;
+                                }
+                            }
+                            else*/
+                            New_Turn_Timer++;
+                            break;
+                        case 1:
+                            New_Turn_Action++;
+                            New_Turn_Timer = 0;
+                            break;
+                        default:
+                            New_Turn_Timer++;
+                            break;
+                    }
+                    break;
+                // Next phase
+                case 3:
                     New_Turn_Phase++;
                     New_Turn_Action = 0;
                     New_Turn_Timer = 0;

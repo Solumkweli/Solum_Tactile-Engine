@@ -139,11 +139,11 @@ namespace Tactile
             Data = data;
             initialize_images();
             Name1.text = Data.Name1;
-            Name1.offset = new Vector2(Font_Data.text_width(Name1.text) / 2, 0);
+            Name1.offset = new Vector2(Font_Data.text_width(Name1.text) / 2, 1);
             if (Data.Battler_2_Id != null)
             {
                 Name2.text = Data.Name2;
-                Name2.offset = new Vector2(Font_Data.text_width(Name2.text) / 2, 0);
+                Name2.offset = new Vector2(Font_Data.text_width(Name2.text) / 2, 1);
             }
         }
 
