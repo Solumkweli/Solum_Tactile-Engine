@@ -618,6 +618,12 @@ namespace Tactile
                     if (!magic)
                         if (!target.nihil(this))
                             n -= 25;
+            // Skills: Agility
+            if (target != null)
+                // This reduces the attacker's hit, not the defender's avoid, so the one with the skill is the target
+                if (target.actor.has_skill("AGILITY"))
+                    if (target.actor.stat(Stat_Labels.Spd) > actor.stat(Stat_Labels.Spd))
+                            n -= Math.Min((target.actor.stat(Stat_Labels.Spd) - actor.stat(Stat_Labels.Spd)) * 2, 20);
             // Skills: Cyclone
             if (target != null)
                 // This reduces the attacker's hit, not the defender's avoid, so the one with the skill is the target
