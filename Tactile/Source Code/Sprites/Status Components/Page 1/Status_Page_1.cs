@@ -221,8 +221,8 @@ namespace Tactile
                         return new ItemState
                         {
                             Item = unit.actor.items[j],
-                            Drops = unit.drops_item && j == unit.actor.dropped_item,
-                            Equipped = unit.actor.equipped - 1 == j
+                            Drops = unit.drops_item && j == unit.actor.num_items - 1,
+                            Equipped = (unit.actor.equipped - 1 == j) || (unit.actor.secondary_equipped - 1 == j)
                         };
                     }));
                 nodes.Last().loc = loc;

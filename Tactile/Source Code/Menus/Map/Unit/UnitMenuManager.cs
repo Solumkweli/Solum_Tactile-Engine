@@ -757,6 +757,23 @@ namespace Tactile.Menus.Map.Unit
 
                         menu_Closed(itemOptionsMenu, e);
                     }
+                    else if (unit.actor.is_secondary_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]))
+                    {
+                        if (itemOptionsMenu.Unequips)
+                        {
+                            Global.game_system.play_se(System_Sounds.Cancel);
+                            unit.actor.unequip_secondary();
+                        }
+                        else
+                        {
+                            Global.game_system.play_se(System_Sounds.Open);
+                            unit.equip_secondary(itemIndex + 1);
+                        }
+                        unit.actor.organize_items();
+                        itemMenu.RefreshInventory();
+
+                        menu_Closed(itemOptionsMenu, e);
+                    }
                     else
                         Global.game_system.play_se(System_Sounds.Buzzer); // should pop up a help window //@Yeti
                     break;

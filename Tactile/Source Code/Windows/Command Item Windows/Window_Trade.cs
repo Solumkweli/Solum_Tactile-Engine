@@ -24,7 +24,7 @@ namespace Tactile.Windows.Command
         private bool Glow = false;
         private System_Color_Window Window1, Window2;
         private List<CommandUINode> Item_Imgs1 = new List<CommandUINode>(), Item_Imgs2 = new List<CommandUINode>();
-        private TextSprite Equipped_Tag1, Equipped_Tag2;
+        private TextSprite Equipped_Tag1, Equipped_Tag2, Equipped_Tag3, Equipped_Tag4;
         private Face_Sprite Face1, Face2;
         private Window_Help Help_Window;
         private Unit_Line_Cursor Glowing_Line;
@@ -152,6 +152,12 @@ namespace Tactile.Windows.Command
             Equipped_Tag2 = new TextSprite();
             Equipped_Tag2.SetFont(Config.UI_FONT, Global.Content, "White");
             Equipped_Tag2.text = "$";
+            Equipped_Tag3 = new TextSprite();
+            Equipped_Tag3.SetFont(Config.UI_FONT, Global.Content, "White");
+            Equipped_Tag3.text = "$";
+            Equipped_Tag4 = new TextSprite();
+            Equipped_Tag4.SetFont(Config.UI_FONT, Global.Content, "White");
+            Equipped_Tag4.text = "$";
 
             Glowing_Line = new Unit_Line_Cursor(SPACING - 16);
 
@@ -232,6 +238,8 @@ namespace Tactile.Windows.Command
 
             Equipped_Tag1.loc = loc + new Vector2(SPACING - 16, actor1.equipped * 16 - 8);
             Equipped_Tag2.loc = loc + new Vector2(SPACING * 2 - 16, actor2.equipped * 16 - 8);
+            Equipped_Tag3.loc = loc + new Vector2(SPACING - 16, actor1.secondary_equipped * 16 - 8);
+            Equipped_Tag4.loc = loc + new Vector2(SPACING * 2 - 16, actor2.secondary_equipped * 16 - 8);
         }
 
         private void item_node(int unit_index, int index, List<CommandUINode> nodes)
@@ -631,6 +639,10 @@ namespace Tactile.Windows.Command
                 Equipped_Tag1.draw(sprite_batch, -draw_vector());
             if (actor2.equipped > 0)
                 Equipped_Tag2.draw(sprite_batch, -draw_vector());
+            if (actor1.secondary_equipped > 0)
+                Equipped_Tag3.draw(sprite_batch, -draw_vector());
+            if (actor2.secondary_equipped > 0)
+                Equipped_Tag4.draw(sprite_batch, -draw_vector());
         }
     }
 }

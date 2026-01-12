@@ -245,6 +245,10 @@ namespace TactileLibrary
             //int num = PHYSICAL_TYPES; //Debug
             //return ((int)Main_Type <= num && (int)Scnd_Type > num);
         }
+        public bool is_secondary_equip()
+        {
+            return Config.Item.secondary_equip_weapon_types.Contains(main_type().Name);
+        }
 
         public bool blocked_by_silence
         {

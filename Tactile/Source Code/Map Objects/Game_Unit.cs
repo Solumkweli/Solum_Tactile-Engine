@@ -956,6 +956,11 @@ public int priority
                 return 0;
             Data_Weapon weapon = Global.data_weapons[weapon_id];
             int wgt = actor.weapon_wgt(weapon);
+            if (actor.secondary_equip != null)
+                if (Global.data_weapons.ContainsKey(actor.secondary_equip_id))
+                {
+                    wgt += actor.weapon_wgt(actor.secondary_equip);
+                }
             return (int)(stat(Stat_Labels.Con) < wgt ? wgt - stat(Stat_Labels.Con) : 0);
         }
 
@@ -1206,6 +1211,15 @@ public int priority
             else
             {
                 actor.weapon_id = this.items[index - 1].Id;
+            }
+        }
+        public void equip_secondary(int index)
+        {
+            if (actor.in_equip_range(index))
+                actor.equip_secondary(index);
+            else
+            {
+                actor.secondary_equip_id = this.items[index - 1].Id;
             }
         }
 

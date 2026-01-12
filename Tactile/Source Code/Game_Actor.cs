@@ -14,7 +14,7 @@ using TactileVersionExtension;
 namespace Tactile
 {
     enum Power_Types { Strength, Magic, Power }
-    enum Equippability { CanEquip, CannotEquip, CannotEquipPrf, CanEquipSiege, Silenced }
+    enum Equippability { CanEquip, CanSecondaryEquip, CannotEquip, CannotEquipPrf, CanEquipSiege, Silenced }
     enum StatusEffectCleared { None, AnyRemoved, NegativeRemoved }
     internal partial class Game_Actor
     {
@@ -35,6 +35,7 @@ namespace Tactile
         private int Lives = -1;
         private List<Item_Data> Items = new List<Item_Data>();
         private int Weapon_Id = 0, Equipped = 0;
+        private int Secondary_Equip_Id = 0, Secondary_Equipped = 0;
         private bool Needs_Promotion = false;
         private List<int> Growth_Bonuses = new List<int>();
         private List<int[]> States = new List<int[]>();
@@ -80,6 +81,8 @@ namespace Tactile
             //writer.Write(Mov_Plus);
             writer.Write(Weapon_Id);
             writer.Write(Equipped);
+            writer.Write(Secondary_Equip_Id);
+            writer.Write(Secondary_Equipped);
             writer.Write(Needs_Promotion);
             //writer.Write(Backfire);
             Growth_Bonuses.write(writer);
@@ -204,6 +207,8 @@ namespace Tactile
             }
             Weapon_Id = reader.ReadInt32();
             Equipped = reader.ReadInt32();
+            Secondary_Equip_Id = reader.ReadInt32();
+            Secondary_Equipped = reader.ReadInt32();
             Needs_Promotion = reader.ReadBoolean();
             if (Global.LOADED_VERSION.older_than(0, 4, 3, 1))
             {
@@ -392,6 +397,9 @@ namespace Tactile
                     if (is_equipped)
                         if (!is_equippable(this.weapon))
                             unequip();
+                    if (is_secondary_equipped)
+                        if (!is_secondary_equippable(this.secondary_equip))
+                            unequip_secondary();
                     // Skill stuff here
                 }
                 /*if (Global.data_classes.ContainsKey(value))
@@ -432,6 +440,9 @@ namespace Tactile
                         if (is_equipped)
                             if (!is_equippable(this.weapon))
                                 unequip();
+                        if (is_secondary_equipped)
+                            if (!is_secondary_equippable(this.secondary_equip))
+                                unequip_secondary();
                         // Skill stuff here
                     }
                 //}
@@ -555,6 +566,15 @@ namespace Tactile
                 skill_list_update();
             }
         }
+        public int secondary_equip_id
+        {
+            get { return Secondary_Equip_Id; }
+            set
+            {
+                Secondary_Equip_Id = value;
+                skill_list_update();
+            }
+        }
         /// <summary>
         /// The weapon currently being used by this actor.
         /// This can differ from the equipped weapon, for example during the arena or when using siege engines.
@@ -568,7 +588,15 @@ namespace Tactile
                 return Weapon_Id == 0 ? null : Global.data_weapons[Weapon_Id];
             }
         }
-
+        public Data_Weapon secondary_equip
+        {
+            get
+            {
+                if (!Global.data_weapons.ContainsKey(Secondary_Equip_Id))
+                    return null;
+                return Secondary_Equip_Id == 0 ? null : Global.data_weapons[Secondary_Equip_Id];
+            }
+        }
         /// <summary>
         /// The Id of the weapon currently being used by this actor, or the first equippable weapon if nothing can be equipped.
         /// For use when sorting actors by their weapons.
@@ -593,7 +621,9 @@ namespace Tactile
         }
 
         public int equipped { get { return Equipped; } }
+        public int secondary_equipped { get { return Secondary_Equipped; } }
         public bool is_equipped { get { return Equipped > 0; } }
+        public bool is_secondary_equipped { get { return Secondary_Equipped > 0; } }
 
         public List<int> states
         {
@@ -769,7 +799,7 @@ namespace Tactile
                     var weapon = item_data.to_weapon;
                     if (weapon == null)
                         continue;
-                    if (!is_equippable(weapon))
+                    if (!is_equippable(weapon) && !is_secondary_equippable(weapon))
                     {
                         WeaponType type = valid_possible_weapon_type_of(weapon);
                         if (prf_check(weapon) && (int)weapon.Rank <= max_weapon_level(type))
@@ -1783,6 +1813,10 @@ namespace Tactile
             if (this.weapon != null)
                 foreach (int skill_id in this.weapon.Skills)
                     skills.Add(skill_id);
+            // Secondary equip skills
+            if (this.secondary_equip != null)
+                foreach (int skill_id in this.secondary_equip.Skills)
+                    skills.Add(skill_id);
             // Status skills
             foreach (int status_id in states)
                 foreach (int skill_id in Global.data_statuses[status_id].Skills)
@@ -1846,6 +1880,11 @@ namespace Tactile
                     foreach (int skill_id in this.weapon.Skills)
                         if (!skills.Contains(skill_id))
                             skills.Add(skill_id);
+                // Secondary equip skills
+                if (this.secondary_equip != null)
+                    foreach (int skill_id in this.secondary_equip.Skills)
+                        if (!skills.Contains(skill_id))
+                            skills.Add(skill_id);
                 // Item skills
                 foreach (Item_Data item_data in Items)
                     if (item_data.Id > 0 && item_data.is_item)
@@ -1875,6 +1914,10 @@ namespace Tactile
                 // Weapon skills
                 if (this.weapon != null)
                     foreach (int skill_id in this.weapon.Skills)
+                        skills.Add(skill_id);
+                // Secondary equip skills
+                if (this.secondary_equip != null)
+                    foreach (int skill_id in this.secondary_equip.Skills)
                         skills.Add(skill_id);
                 // Item skills
                 /* //Debug
@@ -2127,6 +2170,7 @@ namespace Tactile
             // why in reverse order, did i not know about break; at the time? //Yeti
             // Yeah but now it does something meaningful so don't worry about it //Debug
             int equipped = 0;
+            int secondary_equipped = 0;
             for (int i = Global.ActorConfig.NumItems - 1; i >= 0; i--)
             {
                 // If -1 uses, assume the item is at default uses and set it to the max
@@ -2134,8 +2178,12 @@ namespace Tactile
                     Items[i].Uses = Items[i].Id == 0 ? 0 : Items[i].max_uses;
                 // Look for a weapon to equip
                 if (!Items[i].blank_item && Items[i].is_weapon)
+                {
                     if (is_equippable(Items[i].to_weapon))
                         equipped = i + 1;
+                    else if (is_secondary_equippable(Items[i].to_weapon))
+                        secondary_equipped = i + 1;
+                }
             }
             // Equips the indicated item
             if (equipped != 0)
@@ -2146,6 +2194,14 @@ namespace Tactile
             }
             else
                 unequip();
+            if (secondary_equipped != 0)
+            {
+                equip_secondary(secondary_equipped);
+                if (organize)
+                    organize_items();
+            }
+            else
+                unequip_secondary();
             skill_list_update();
         }
 
@@ -2572,6 +2628,20 @@ namespace Tactile
             }
             skill_list_update();
         }
+        public void equip_secondary(int index)
+        {
+            if (index == 0 || index > num_items)
+            {
+                Secondary_Equip_Id = 0;
+                Secondary_Equipped = 0;
+            }
+            else
+            {
+                Secondary_Equip_Id = Items[index - 1].Id;
+                Secondary_Equipped = index;
+            }
+            skill_list_update();
+        }
 
         /// <summary>
         /// 
@@ -2580,7 +2650,10 @@ namespace Tactile
         {
             equip(0);
         }
-
+        public void unequip_secondary()
+        {
+            equip_secondary(0);
+        }
         public bool in_equip_range(int index)
         {
             return index <= Global.ActorConfig.NumItems;
@@ -2821,6 +2894,12 @@ namespace Tactile
                 return false;
             return is_equippable(Items[item_index].to_weapon);
         }
+        public bool is_secondary_equippable(int item_index)
+        {
+            if (!Items[item_index].is_weapon || Items[item_index].non_equipment)
+                return false;
+            return is_secondary_equippable(Items[item_index].to_weapon);
+        }
         /// <summary>
         /// Returns true if the actor qualifies for the checked weapon's rank and all Prf checks succeed
         /// </summary>
@@ -2828,6 +2907,10 @@ namespace Tactile
         public bool is_equippable(Data_Weapon weapon)
         {
             return equippable(weapon) == Equippability.CanEquip;
+        }
+        public bool is_secondary_equippable(Data_Weapon weapon)
+        {
+            return equippable(weapon) == Equippability.CanSecondaryEquip;
         }
         /// <summary>
         /// Returns true if the actor can equip the weapon, allowing siege weapons
@@ -2868,6 +2951,9 @@ namespace Tactile
 
                 if (this.silenced && weapon.blocked_by_silence)
                     return Equippability.Silenced;
+
+                if (weapon.is_secondary_equip())
+                    return Equippability.CanSecondaryEquip;
 
                 return weapon.Ballista() ?
                     Equippability.CanEquipSiege : Equippability.CanEquip;
