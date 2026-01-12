@@ -2906,11 +2906,11 @@ namespace Tactile
         /// <param name="weapon">Weapon to check</param>
         public bool is_equippable(Data_Weapon weapon)
         {
-            return equippable(weapon) == Equippability.CanEquip;
+            return equippable(weapon) == Equippability.CanEquip || equippable(weapon) == Equippability.CanSecondaryEquip + 5;
         }
         public bool is_secondary_equippable(Data_Weapon weapon)
         {
-            return equippable(weapon) == Equippability.CanSecondaryEquip;
+            return equippable(weapon) == Equippability.CanSecondaryEquip || equippable(weapon) == Equippability.CanSecondaryEquip + 5;
         }
         /// <summary>
         /// Returns true if the actor can equip the weapon, allowing siege weapons
@@ -2939,7 +2939,7 @@ namespace Tactile
         /// <summary>
         /// Determines the equippability of a weapon, and the reason why
         /// </summary>
-        private Equippability equippable(Data_Weapon weapon)
+        private Equippability equippable(Data_Weapon weapon) // Weapon Rank Check Equippable
         {
             var weapon_type = valid_weapon_type_of(weapon);
             bool valid_rank = (int)weapon.Rank <= get_weapon_level(weapon_type);
@@ -2952,8 +2952,11 @@ namespace Tactile
                 if (this.silenced && weapon.blocked_by_silence)
                     return Equippability.Silenced;
 
+                if (weapon.is_weapon_and_secondary_equip())
+                    return Equippability.CanSecondaryEquip + 5;
+
                 if (weapon.is_secondary_equip())
-                    return Equippability.CanSecondaryEquip;
+                    return Equippability.CanSecondaryEquip;//Here Secondary Equip check
 
                 return weapon.Ballista() ?
                     Equippability.CanEquipSiege : Equippability.CanEquip;

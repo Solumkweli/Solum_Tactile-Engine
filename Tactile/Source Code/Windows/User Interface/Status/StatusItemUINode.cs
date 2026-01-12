@@ -26,7 +26,7 @@ namespace Tactile.Windows.UserInterface.Status
 
             EquippedTag = new TextSprite();
             EquippedTag.draw_offset = new Vector2(120, 0);
-            EquippedTag.SetFont(Config.UI_FONT, Global.Content, "White");
+            EquippedTag.SetFont(Config.UI_FONT, Global.Content, "Yellow");
             EquippedTag.text = "$";
             EquippedTag.visible = false;
 
@@ -43,7 +43,9 @@ namespace Tactile.Windows.UserInterface.Status
                 Item.set_image(unit.actor, state.Item);
                 if (state.Drops)
                     Item.change_text_color("Green");
-                EquippedTag.visible = state.Equipped;
+                EquippedTag.visible = state.Equipped || state.Secondary_Equipped;
+                if (state.Secondary_Equipped)
+                    EquippedTag.SetFont(Config.UI_FONT, Global.Content, "White");
 
                 _enabled = !state.Item.non_equipment;
             }
@@ -79,5 +81,6 @@ namespace Tactile.Windows.UserInterface.Status
         internal Item_Data Item;
         internal bool Drops;
         internal bool Equipped;
+        internal bool Secondary_Equipped;
     }
 }
