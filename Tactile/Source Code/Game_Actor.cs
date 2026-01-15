@@ -2925,7 +2925,7 @@ namespace Tactile
             // Check if the weapon's type is a parent of a type this actor has
             if (Global.ActorConfig.ChildWeaponTypeAllowsParent)
             {
-                // If this type can't already be used as its own type
+                // If this type can't already be used as its own type // Fire is still here
                 if ((int)weapon.Rank > get_weapon_level(weapon_type))
                     foreach (var child_type in Global.weapon_types
                             .OrderByDescending(x => weapon_levels(x)))
@@ -2945,7 +2945,7 @@ namespace Tactile
                             return parent_type;
             }
 
-            return weapon_type;
+            return weapon_type; // Fire returns its type = 5
         }
 
         /// <summary>
@@ -3027,8 +3027,10 @@ namespace Tactile
         public bool is_equippable_as_siege(Data_Weapon weapon)
         {
             var equip = equippable(weapon);
-            return equip == Equippability.CanEquip ||
-                equip == Equippability.CanEquipSiege;
+            return equip == Equippability.CanEquip 
+                || equip == Equippability.CanSecondaryEquip 
+                || equip == Equippability.MainCanSecondaryEquip 
+                || equip == Equippability.CanEquipSiege;
         }
 
         public bool is_equippable(List<Item_Data> items, int index)
@@ -3063,7 +3065,7 @@ namespace Tactile
             bool valid_rank = (int)weapon.Rank <= get_weapon_level(weapon_type);
             //bool valid_scnd_type = secondary_weapon_type =  //add rank check later 
 
-            if (valid_rank)
+            if (valid_rank) // CanEquip
             {
                 if (!prf_check(weapon))
                     return Equippability.CannotEquipPrf;
@@ -3071,17 +3073,16 @@ namespace Tactile
                 if (this.silenced && weapon.blocked_by_silence)
                     return Equippability.Silenced;
 
+                if (weapon.Ballista())
+                    return Equippability.CanEquipSiege;
+
                 if (weapon.scndtype_is_secondary_equip())
                     return Equippability.MainCanSecondaryEquip;
 
-                if (weapon.is_secondary_equip() || weapon.scndtype_is_secondary_equip() && !weapon_is_main_equipped)
-                    return Equippability.CanSecondaryEquip;//Here Secondary Equip check
+                if (weapon.is_secondary_equip())
+                return Equippability.CanSecondaryEquip;
 
-                if (weapon.scndtype_is_secondary_equip() && !weapon_is_secondary_equipped)
-                    return Equippability.CanEquip;//Here Secondary Equip check
-
-                return weapon.Ballista() ?
-                    Equippability.CanEquipSiege : Equippability.CanEquip;
+                return Equippability.CanEquip; // CanEquip
             }
             return Equippability.CannotEquip;
         }

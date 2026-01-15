@@ -1862,14 +1862,13 @@ public int priority
         {
             // Equips weapon temporarily in case it gives range affecting skills
             int equipped = actor.equipped;
-            int Secondary_equipped = actor.secondary_equipped;
             Data_Weapon weapon = range_weapon(item_index);
             if (weapon == null) return 0;
             // Allow unequippable weapons if checking equipped weapon
             if (item_index != -1 && !actor.is_equippable_as_siege(weapon))
             {
                 equip(equipped);
-                return 0;
+                return 0; // ?????? This must be why
             }
             int min_range = weapon.Min_Range;
             min_range = min_range_skill(weapon, min_range);
@@ -2040,7 +2039,7 @@ public int priority
             return (int)max;
         }
 
-        protected Data_Weapon range_weapon(int item_index)
+        protected Data_Weapon range_weapon(int item_index) // Just get's the checked weapon's data
         {
             int weapon_id;
             if (item_index == -1)
