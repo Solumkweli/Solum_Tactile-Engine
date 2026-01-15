@@ -380,7 +380,7 @@ namespace Tactile.Windows.Map
             }
         }
 
-        private bool valid_weapon_test()
+        private bool valid_weapon_test() // test battle never used in chapters
         {
             if (actor.weapon == null)
             {
@@ -536,7 +536,7 @@ namespace Tactile.Windows.Map
             refresh();
         }
 
-        private void validate_weapon(Game_Actor actor, bool forceEquip = false)
+        private void validate_weapon(Game_Actor actor, bool forceEquip = false) // Test battles only, not in gameplay
         {
             if (forceEquip || actor.is_equippable(0))
             {

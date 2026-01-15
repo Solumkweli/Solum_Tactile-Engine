@@ -70,12 +70,23 @@ namespace Tactile
             }
             else
             {
-                if (actor.weapon == null)
+                if (actor.weapon == null && actor.secondary_equip == null)
                     Weapon_Name.text = "Unarmed";
                 else
                 {
+                    Data_Weapon item2 = actor.secondary_equip;
                     Data_Weapon item = actor.weapon;
                     Weapon_Name.text = item.Name;
+                    if (actor.secondary_equip != null)
+                    { 
+                        Icons.Add(new Item_Icon_Sprite());
+                            if (Global.content_exists(@"Graphics/Icons/" + item2.Image_Name))
+                                Icons[Icons.Count - 1].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + item2.Image_Name);
+                        Icons[Icons.Count - 1].index = item2.Image_Index;
+                        Icons[Icons.Count - 1].loc = new Vector2(7, 2);
+                        Icons[Icons.Count - 1].scissor = scissor();
+                        Weapon_Name.text = "  " + item.Name ;
+                    }
                     Icons.Add(new Item_Icon_Sprite());
                     if (Global.content_exists(@"Graphics/Icons/" + item.Image_Name))
                         Icons[Icons.Count - 1].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + item.Image_Name);

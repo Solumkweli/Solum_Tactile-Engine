@@ -24,6 +24,8 @@ namespace Tactile
             Data_Weapon weapon = item_data.to_weapon;
             int stats = !weapon.is_staff() ? 6 : 3;
             bool effective = false;
+            
+
             foreach(int bonus in weapon.Effectiveness)
                 if (bonus != 1)
                 {
@@ -185,6 +187,7 @@ namespace Tactile
                         Effectiveness_Multipliers[Effectiveness_Icons.Count - 1].set_effectiveness(weapon.Effectiveness[i]);
                     }
         }
+
 
         public void update()
         {

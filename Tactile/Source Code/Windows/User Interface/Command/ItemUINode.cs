@@ -20,7 +20,7 @@ namespace Tactile.Windows.UserInterface.Command
 
             EquippedTag = new TextSprite();
             EquippedTag.draw_offset = new Vector2(width - 8, 0);
-            EquippedTag.SetFont(Tactile.Config.UI_FONT, Global.Content, "White");
+            EquippedTag.SetFont(Tactile.Config.UI_FONT, Global.Content, "Yellow");
             EquippedTag.text = "$";
             EquippedTag.visible = false;
         }
@@ -31,9 +31,14 @@ namespace Tactile.Windows.UserInterface.Command
             EquippedTag.SetColor(Global.Content, color);
         }
 
-        internal void equip(bool value)
+        internal void equip_tag(bool value)
         {
             EquippedTag.visible = value;
+        }
+        internal void equip_tag_secondary(bool value)
+        {
+            if (value)
+                EquippedTag.SetFont(Tactile.Config.UI_FONT, Global.Content, "White"); ;
         }
 
         protected override void update_graphics(bool activeNode)

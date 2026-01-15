@@ -740,7 +740,42 @@ namespace Tactile.Menus.Map.Unit
             {
                 // Equip
                 case 0:
-                    if (unit.actor.is_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]))
+                    if (unit.actor.is_main_and_secondary_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]))
+                    {
+                        if (itemOptionsMenu.Unequips)
+                        {
+                            Global.game_system.play_se(System_Sounds.Cancel);
+                            if (unit.actor.secondary_equipped == itemIndex + 1)
+                            unit.actor.unequip_secondary();
+                            else
+                                unit.actor.unequip();
+                            unit.actor.organize_items();
+                            itemMenu.RefreshInventory();
+
+                            menu_Closed(itemOptionsMenu, e);
+                        }
+                        else // Equip
+                        {
+                            Global.game_system.play_se(System_Sounds.Confirm);
+                            var equipChoiceWindow = new Window_Command(
+                                itemOptionsMenu.WindowLoc +
+                                    new Vector2(40, 8 + itemOptionsMenu.Index * 16),
+                                60,
+                                new List<string> { "Main", "Secondary" });
+                            Global.game_system.play_se(System_Sounds.Open);
+                            equipChoiceWindow.stereoscopic = Config.MAPCOMMAND_WINDOW_DEPTH;
+                            equipChoiceWindow.help_stereoscopic = Config.MAPCOMMAND_HELP_DEPTH;
+                            equipChoiceWindow.small_window = true;
+                            equipChoiceWindow.immediate_index = 1;
+
+                            var equipChoiceMenu = new CommandMenu(equipChoiceWindow, itemMenu);
+                            equipChoiceMenu.Selected += equipChoiceMenu_Selected;
+                            equipChoiceMenu.Canceled += menu_Closed;
+                            AddMenu(equipChoiceMenu);
+
+                        }
+                    } 
+                    else if (unit.actor.is_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]) && !unit.actor.is_main_and_secondary_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]))
                     {
                         if (itemOptionsMenu.Unequips)
                         {
@@ -757,7 +792,7 @@ namespace Tactile.Menus.Map.Unit
 
                         menu_Closed(itemOptionsMenu, e);
                     }
-                    else if (unit.actor.is_secondary_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]))
+                    else if (unit.actor.is_secondary_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]) && !unit.actor.is_main_and_secondary_equippable(Global.data_weapons[unit.actor.items[itemIndex].Id]))
                     {
                         if (itemOptionsMenu.Unequips)
                         {
@@ -834,6 +869,66 @@ namespace Tactile.Menus.Map.Unit
             }
         }
 
+        private void equipChoiceMenu_Selected(object sender, EventArgs e)
+        {
+            var equipChoiceMenu = (sender as CommandMenu);
+            var selected = equipChoiceMenu.SelectedIndex;
+            // Close item options menus
+            menu_Closed(sender, e);
+            RemoveTopMenu();
+
+            var itemMenu = (Menus.Peek() as ItemMenu);
+            var unitMenu = (Menus.ElementAt(1) as UnitCommandMenu);
+            Game_Unit unit = itemMenu.Unit;
+            int itemIndex = itemMenu.SelectedItem;
+            switch (selected.Index)
+            {
+                // Main
+                case 0:
+                    Global.game_system.play_se(System_Sounds.Open);
+                    unit.equip(itemIndex + 1);
+                    // Update attack range
+                    Global.game_map.remove_updated_move_range(unit.id);
+                    // Unit window has to restart in case options have changed
+                    unitMenu.RefreshCommands(unitMenu.Canto);
+                    unit.actor.organize_items();
+                    itemMenu.RefreshInventory();
+
+                    break;
+                // Secondary
+                case 1:
+                    Global.game_system.play_se(System_Sounds.Open);
+                    unit.equip_secondary(itemIndex + 1);
+                    // Update attack range
+                    Global.game_map.remove_updated_move_range(unit.id);
+                    // Unit window has to restart in case options have changed
+                    unitMenu.RefreshCommands(unitMenu.Canto);
+                    unit.actor.organize_items();
+                    itemMenu.RefreshInventory();
+                    break;
+
+            }
+        }
+        /*private void equipMenu_Selected(object sender, EventArgs e)
+        {
+            var equipMenu = (sender as EquipMenu);
+            string text = equipMenu.DropText;
+
+            var equipChoiceWindow = new Window_Confirmation();
+            equipChoiceWindow.loc = equipMenu.SelectedOptionLoc;
+            equipChoiceWindow.set_text(text);
+            equipChoiceWindow.add_choice("Main", new Vector2(16, 16));
+            equipChoiceWindow.add_choice("Secondary", new Vector2(56, 16));
+            equipChoiceWindow.index = 1;
+            if (equipChoiceWindow.loc.Y + equipChoiceWindow.size.Y >= Config.WINDOW_HEIGHT)
+                equipChoiceWindow.loc = equipMenu.SelectedOptionLoc -
+                    new Vector2(0, equipChoiceWindow.size.Y + 16);
+
+            var suspendConfirmMenu = new ConfirmationMenu(equipChoiceWindow);
+            suspendConfirmMenu.Confirmed += equipMenu_Confirmed;
+            suspendConfirmMenu.Canceled += menu_Closed;
+            AddMenu(suspendConfirmMenu);
+        }*/
         private void UseItem(ItemMenu itemMenu, ItemOptionsMenu itemOptionsMenu = null)
         {
             var unit = itemMenu.Unit;

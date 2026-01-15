@@ -239,26 +239,62 @@ namespace Tactile
                 Stat_Imgs[Stat_Imgs.Count - 1].text = "0";
             }
             // Weapon
+            TactileLibrary.Data_Weapon secondary1 = null;
+            TactileLibrary.Data_Weapon secondary2 = null;
+            secondary1 = battler_1.actor.secondary_equip;
+            secondary2 = battler_2.actor.secondary_equip;
+
+                // Main and secondary icons
             Weapon_Icons.Add(new Item_Icon_Sprite());
-            Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
+            if (secondary1 != null)
+                Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((Reverse ? 48 : Config.WINDOW_WIDTH - 148), 149 + 15); // Secondary is moved here when secondary equipped
+            else
+                Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13); // Main
+
+            Weapon_Icons.Add(new Item_Icon_Sprite());
+            if (secondary1 != null)
+                Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((Reverse ? 52 : Config.WINDOW_WIDTH - 156), 149 + 11); // Main is moved here when secondary equipped
+            else
+                Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((Reverse ? 50 : Config.WINDOW_WIDTH - 148), 149 + 13); // Secondary
+
+                // Names
             Weapon_Names.Add(new TextSprite());
             Weapon_Names[Weapon_Names.Count - 1].loc = new Vector2((Reverse ? 108 : Config.WINDOW_WIDTH - 92), 149 + 12);
             Weapon_Names[Weapon_Names.Count - 1].SetFont(Config.UI_FONT, Global.Content, "White");
             Mults.Add(new Multiplier_Img());
             Mults[Mults.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
             WTAs.Add(new Weapon_Triangle_Arrow());
-            WTAs[WTAs.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
+            if (secondary1 != null)
+                WTAs[WTAs.Count - 1].loc = new Vector2((Reverse ? 52 : Config.WINDOW_WIDTH - 148), 149 + 13);
+            else
+                WTAs[WTAs.Count - 1].loc = new Vector2((Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
+
+            // Battler 2
             if (battler_2 != null)
             {
+                // Main and secondary icons
                 Weapon_Icons.Add(new Item_Icon_Sprite());
-                Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
+                if (secondary2 != null)
+                    Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((!Reverse ? 52 : Config.WINDOW_WIDTH - 148), 149 + 15); // Secondary is moved here when secondary equipped
+                else
+                    Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13); // Main
+
+                Weapon_Icons.Add(new Item_Icon_Sprite()); 
+                if (secondary2 != null)
+                    Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 11); // Main is moved here when secondary equipped
+                else
+                    Weapon_Icons[Weapon_Icons.Count - 1].loc = new Vector2((!Reverse ? 52 : Config.WINDOW_WIDTH - 148), 149 + 13); // Secondary
+
                 Weapon_Names.Add(new TextSprite());
                 Weapon_Names[Weapon_Names.Count - 1].loc = new Vector2((!Reverse ? 108 : Config.WINDOW_WIDTH - 92), 149 + 12);
                 Weapon_Names[Weapon_Names.Count - 1].SetFont(Config.UI_FONT, Global.Content, "White");
                 Mults.Add(new Multiplier_Img());
                 Mults[Mults.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
                 WTAs.Add(new Weapon_Triangle_Arrow());
-                WTAs[WTAs.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
+                if (secondary2 != null)
+                    WTAs[WTAs.Count - 1].loc = new Vector2((!Reverse ? 52 : Config.WINDOW_WIDTH - 148), 149 + 13);
+                else
+                    WTAs[WTAs.Count - 1].loc = new Vector2((!Reverse ? 44 : Config.WINDOW_WIDTH - 156), 149 + 13);
             }
             // Weapon triangle //Yeti
             if (Data == null)
@@ -531,6 +567,8 @@ namespace Tactile
 
                 TactileLibrary.Data_Weapon weapon1 = null;
                 TactileLibrary.Data_Weapon weapon2 = null;
+                TactileLibrary.Data_Weapon secondary1 = null;
+                TactileLibrary.Data_Weapon secondary2 = null;
                 WTAs[0].value = 0;
                 if (Global.scene.scene_type == "Scene_Dance" || Global.scene.scene_type == "Scene_Promotion")
                 {
@@ -565,9 +603,23 @@ namespace Tactile
                 else
                 {
                     weapon1 = battler_1.actor.weapon;
-                    Weapon_Icons[0].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon1.Image_Name);
-                    Weapon_Icons[0].index = weapon1.Image_Index;
+                    secondary1 = battler_1.actor.secondary_equip;
+
+                    if (secondary1 != null)
+                    { 
+                        Weapon_Icons[0].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + secondary1.Image_Name);
+                        Weapon_Icons[0].index = secondary1.Image_Index;
+                        Weapon_Icons[1].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon1.Image_Name);
+                        Weapon_Icons[1].index = weapon1.Image_Index;
+                    }
+                    else
+                    {
+                        Weapon_Icons[0].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon1.Image_Name);
+                        Weapon_Icons[0].index = weapon1.Image_Index;
+                    }
                     if (!(Data is Staff_Data) || ((Staff_Data)Data).attack_staff)
+                        if (secondary1 != null)
+                            Weapon_Icons[1].flash = weapon1.effective_multiplier(battler_1, battler_2) > 1;
                         Weapon_Icons[0].flash = weapon1.effective_multiplier(battler_1, battler_2) > 1;
                     Weapon_Names[0].offset.X = Font_Data.text_width(weapon1.full_name()) / 2;
                     Weapon_Names[0].text = weapon1.full_name();
@@ -577,12 +629,26 @@ namespace Tactile
                     {
                         WTAs[1].value = 0;
                         weapon2 = battler_2.actor.weapon;
+                        secondary2 = battler_2.actor.secondary_equip;
                         if (weapon2 != null)
                         {
-                            Weapon_Icons[1].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon2.Image_Name);
-                            Weapon_Icons[1].index = weapon2.Image_Index;
+
+                            if (secondary2 != null)
+                            { 
+                                Weapon_Icons[2].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + secondary2.Image_Name);
+                                Weapon_Icons[2].index = secondary2.Image_Index;
+                                Weapon_Icons[3].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon2.Image_Name);
+                                Weapon_Icons[3].index = weapon2.Image_Index;
+                            }
+                            else
+                            {
+                                Weapon_Icons[2].texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon2.Image_Name);
+                                Weapon_Icons[2].index = weapon2.Image_Index;
+                            }
                             if (!(Data is Staff_Data) || ((Staff_Data)Data).attack_staff)
-                                Weapon_Icons[1].flash = weapon2.effective_multiplier(battler_2, battler_1) > 1;
+                                if (secondary2 != null)
+                                    Weapon_Icons[3].flash = weapon1.effective_multiplier(battler_1, battler_2) > 1;
+                                Weapon_Icons[2].flash = weapon1.effective_multiplier(battler_1, battler_2) > 1;
                             Weapon_Names[1].offset.X = Font_Data.text_width(weapon2.full_name()) / 2;
                             Weapon_Names[1].text = weapon2.full_name();
                             // Attack Multiplier

@@ -231,7 +231,7 @@ namespace Tactile.Windows.Command.Items
 
         protected void refresh()
         {
-            equip_actor();
+            //equip_actor();
             if (should_refresh_info())
             {
                 int[] stat_values = new int[4];
@@ -274,7 +274,11 @@ namespace Tactile.Windows.Command.Items
                 // For example, so that arms scroll knows what its boosting
                 else
                 {
-                    restore_equipped();
+                    if (unit == null)
+                        if (actor().is_equippable(current_item_data.to_weapon))
+                        restore_equipped();
+                    else if (actor().is_secondary_equippable(current_item_data.to_weapon))
+                        restore_secondary_equipped();
                 }
             }
         }
@@ -284,7 +288,14 @@ namespace Tactile.Windows.Command.Items
             if (unit == null)
                 actor().equip(Equipped);
             else
-                unit.equip(Equipped);
+                    unit.equip(Equipped);
+        }
+        public void restore_secondary_equipped()
+        {
+            if (unit == null)
+                actor().equip(Secondary_Equipped);
+            else
+                unit.equip(Secondary_Equipped);
         }
 
         /* //Debug
@@ -372,8 +383,9 @@ namespace Tactile.Windows.Command.Items
             {
                 for (int i = 0; i < base.Items.Count; i++) //Debug
                 {
-                    (base.Items[i] as ItemUINode).equip(
+                    (base.Items[i] as ItemUINode).equip_tag(
                         (Index_Redirect[i] == Equipped - 1) || (Index_Redirect[i] == Secondary_Equipped -1 )); //Debug
+                    (base.Items[i] as ItemUINode).equip_tag_secondary((Index_Redirect[i] == Secondary_Equipped - 1)); //Debug
                 }
             }
         }

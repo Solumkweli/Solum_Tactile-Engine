@@ -1223,6 +1223,7 @@ public int priority
             }
         }
 
+
         public bool is_weapon_broke()
         {
             return is_weapon_broke(0);
@@ -1861,6 +1862,7 @@ public int priority
         {
             // Equips weapon temporarily in case it gives range affecting skills
             int equipped = actor.equipped;
+            int Secondary_equipped = actor.secondary_equipped;
             Data_Weapon weapon = range_weapon(item_index);
             if (weapon == null) return 0;
             // Allow unequippable weapons if checking equipped weapon

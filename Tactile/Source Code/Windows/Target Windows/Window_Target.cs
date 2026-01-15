@@ -18,7 +18,7 @@ namespace Tactile.Windows.Target
         protected bool Manual_Targeting;
 
         protected ConsumedInput SelectedIndex;
-        private bool Canceled; 
+        private bool Canceled;
 
         #region Accessors
         public int index
@@ -85,7 +85,7 @@ namespace Tactile.Windows.Target
         protected virtual List<T> sort_targets(List<T> targets)
         {
             Game_Unit unit = get_unit();
-            targets.Sort(delegate(T a, T b)
+            targets.Sort(delegate (T a, T b)
             {
                 Vector2 loc1 = target_loc(a);
                 Vector2 loc2 = target_loc(b);

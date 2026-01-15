@@ -2034,6 +2034,9 @@ namespace Tactile
                 }
                 // Skills: Affinity+
                 affinity_stat_boost(ref n, Stat_Labels.Spd);
+                //Secondary Equip ++ 
+                if (actor.weapon_is_main_equipped)
+                    n += 5;
                 // Skills: El's Passage
                 if (actor.has_skill("EL"))
                     n += 5;

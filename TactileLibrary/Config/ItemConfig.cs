@@ -11,6 +11,8 @@ namespace TactileLibrary.Config
         {
             "Shield",
             "Trinket",
+            "Tome",
+            "Equips",
         };
     }
 }

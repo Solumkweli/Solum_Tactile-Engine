@@ -32,7 +32,7 @@ namespace Tactile.Windows.Command.Items
 
         protected override bool is_valid_item(List<Item_Data> items, int i)
         {
-            if (unit.actor.is_equippable(items, i))
+            if (unit.actor.is_equippable(items, i) || unit.actor.is_main_and_secondary_equippable(items, i))
             {
                 var item_data = items[i];
                 Data_Weapon weapon = item_data.to_weapon;

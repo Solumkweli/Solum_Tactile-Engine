@@ -18,7 +18,7 @@ namespace Tactile.Windows.Target
         protected CombatTargetPanel Window;
         protected List<TextSprite> Stat_Labels;
         protected List<Sprite> Stats;
-        Item_Icon_Sprite Icon1, Icon2;
+        Item_Icon_Sprite Icon1, Icon2, Icon3, Icon4;
         Multiplier_Img Mult1, Mult2;
         Effective_WT_Arrow WTA1, WTA2;
         TextSprite Target_Weapon, Name1, Name2;
@@ -90,7 +90,7 @@ namespace Tactile.Windows.Target
             if (unit.swoop_activated)
                 return unit.enemies_in_swoop_range()[0];
             // Skills: Aim
-            if (unit.aim_activated)
+            else if (unit.aim_activated)
                 return unit.enemies_in_aim_range()[0];
             // Skills: Old Swoop
             else if (unit.old_swoop_activated)
@@ -123,8 +123,11 @@ namespace Tactile.Windows.Target
             Mult1 = new Multiplier_Img();
             Mult2 = new Multiplier_Img();
             // Icons
+            Icon3 = new Item_Icon_Sprite();
             Icon1 = new Item_Icon_Sprite();
+            Icon4 = new Item_Icon_Sprite();
             Icon2 = new Item_Icon_Sprite();
+
             // Weapon triangle arrows
             WTA1 = new Effective_WT_Arrow();
             WTA2 = new Effective_WT_Arrow();
@@ -154,7 +157,9 @@ namespace Tactile.Windows.Target
 
         protected override void set_images()
         {
+            Icon3.flash = false;
             Icon1.flash = false;
+            Icon4.flash = false;
             Icon2.flash = false;
             Mult1.value = 0;
             Mult2.value = 0;
@@ -180,9 +185,13 @@ namespace Tactile.Windows.Target
             }
             int distance = combat_distance(unit.id, this.target);
             // Get weapon data
-            TactileLibrary.Data_Weapon weapon1 = actor1.weapon, weapon2 = null;
+            TactileLibrary.Data_Weapon weapon1 = actor1.weapon, secondary1 = actor1.secondary_equip, weapon2 = null, secondary2 = null;
+
             if (is_target_unit)
-                weapon2 = actor2.weapon;
+            { 
+                weapon2 = actor2.weapon; 
+                secondary2 = actor2.secondary_equip;
+            }
             // Weapon triangle arrows
             WTA1.value = 0;
             WTA2.value = 0;
@@ -213,6 +222,15 @@ namespace Tactile.Windows.Target
             // Multiplier
             Mult1.value = Mult1.get_multi(unit, target, weapon1, distance);
             // Icon
+            if (secondary1 != null)
+            {
+                Icon3.index = secondary1.Image_Index;
+                Icon3.texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + secondary1.Image_Name);
+            }
+            else
+            {
+                Icon3.texture = null;
+            }
             Icon1.index = weapon1.Image_Index;
             Icon1.texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + weapon1.Image_Name);
             if (weapon1.effective_multiplier(unit, target_unit) > 1)
@@ -220,6 +238,7 @@ namespace Tactile.Windows.Target
             float effectiveness = weapon1.effective_multiplier(unit, target_unit, false);
             WTA1.set_effectiveness((int)effectiveness,
                 is_target_unit && target_unit.halve_effectiveness());
+
             // Hp
             if (actor1.hp >= Math.Pow(10, Global.BattleSceneConfig.StatusHpCounterValues))
             {
@@ -247,6 +266,15 @@ namespace Tactile.Windows.Target
             Name2.offset = new Vector2(Font_Data.text_width(name2, Config.UI_FONT) / 2, 0);
             Name2.text = name2;
             // Icon
+            if (secondary2 != null)
+            { 
+                Icon4.index = secondary2.Image_Index;
+                Icon4.texture = Global.Content.Load<Texture2D>(@"Graphics/Icons/" + secondary2.Image_Name);
+            }
+            else
+            {
+                Icon4.texture = null;
+            }
             if (weapon2 != null)
             {
                 Target_Weapon.text = weapon2.Name;
@@ -326,6 +354,7 @@ namespace Tactile.Windows.Target
 
         protected override void refresh()
         {
+
             //Window.loc = Loc;
             //foreach (TextSprite label in Stat_Labels)
             //    label.loc = Loc;
@@ -341,7 +370,9 @@ namespace Tactile.Windows.Target
             //WTA1.loc = Loc + new Vector2(4, 4);
             //WTA2.loc = Loc + new Vector2(52, 4 + (Window.rows + 1) * LINE_HEIGHT);
 
+            Icon3.draw_offset = new Vector2(8, 4);
             Icon1.draw_offset = new Vector2(4, 4);
+            Icon4.draw_offset = new Vector2(60, 4 + (Window.rows + 1) * LINE_HEIGHT);
             Icon2.draw_offset = new Vector2(52, 4 + (Window.rows + 1) * LINE_HEIGHT);
             Mult1.draw_offset = new Vector2(65, 12 + 2 * LINE_HEIGHT);
             Mult2.draw_offset = new Vector2(20, 12 + 2 * LINE_HEIGHT);
@@ -355,7 +386,9 @@ namespace Tactile.Windows.Target
             Mult2.update();
             WTA1.update();
             WTA2.update();
+            Icon3.update();
             Icon1.update();
+            Icon4.update();
             Icon2.update();
         }
 
@@ -461,7 +494,9 @@ namespace Tactile.Windows.Target
             draw_data(sprite_batch);
             sprite_batch.End();
 
+            Icon2.draw(sprite_batch, -Loc);
             Icon1.draw(sprite_batch, -Loc);
+            Icon4.draw(sprite_batch, -Loc);
             Icon2.draw(sprite_batch, -Loc);
 
             sprite_batch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);

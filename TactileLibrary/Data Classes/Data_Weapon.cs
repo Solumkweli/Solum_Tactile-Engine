@@ -249,6 +249,10 @@ namespace TactileLibrary
         {
             return Config.Item.secondary_equip_weapon_types.Contains(main_type().Name);
         }
+        public bool scndtype_is_secondary_equip() // if weapon scondary type is equippable as secondary
+        { 
+            return Config.Item.secondary_equip_weapon_types.Contains(scnd_type().Name);
+        }
 
         public bool blocked_by_silence
         {

@@ -147,10 +147,10 @@ namespace Tactile.Windows.Command
             Window2.height = Num * 16 + 16;
             Window2.loc = loc + new Vector2(SPACING, 0);
             Equipped_Tag1 = new TextSprite();
-            Equipped_Tag1.SetFont(Config.UI_FONT, Global.Content, "White");
+            Equipped_Tag1.SetFont(Config.UI_FONT, Global.Content, "Yellow");
             Equipped_Tag1.text = "$";
             Equipped_Tag2 = new TextSprite();
-            Equipped_Tag2.SetFont(Config.UI_FONT, Global.Content, "White");
+            Equipped_Tag2.SetFont(Config.UI_FONT, Global.Content, "Yellow");
             Equipped_Tag2.text = "$";
             Equipped_Tag3 = new TextSprite();
             Equipped_Tag3.SetFont(Config.UI_FONT, Global.Content, "White");

@@ -35,7 +35,6 @@ namespace Tactile
 
         protected Data_Weapon weapon1 { get { return Weapon_1_Id <= 0 ? null : Global.data_weapons[Weapon_1_Id]; } }
         protected Data_Weapon weapon2 { get { return Weapon_2_Id <= 0 ? null : Global.data_weapons[Weapon_2_Id]; } }
-
         public virtual bool MultipleTargets { get { return false; } }
         #endregion
 
@@ -681,7 +680,14 @@ namespace Tactile
             {
                 battler_2.weapon_use();
             }
-
+            for (int i = 0; i < Weapon_1_Uses; i++)
+            {
+                battler_1.weapon_use();
+            }
+            for (int i = 0; i < Weapon_2_Uses; i++)
+            {
+                battler_2.weapon_use();
+            }
             if (battler_1.using_siege_engine)
             {
                 // Put siege engine in reload state
